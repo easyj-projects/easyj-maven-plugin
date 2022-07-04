@@ -15,6 +15,7 @@
  */
 package icu.easyj.maven.plugin.mojo.utils;
 
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +28,7 @@ import java.util.regex.Pattern;
 public abstract class MatchUtils {
 
 	/**
-	 * 高级匹配，支持*配置，从spring-retry里的PatternMatcher类中复制过来的。
+	 * 高级匹配，同时支持正则与通配符*
 	 *
 	 * @param pattern    匹配串
 	 * @param str        字符串
@@ -167,6 +168,24 @@ public abstract class MatchUtils {
 	public static boolean match(String pattern, String str) {
 		return match(pattern, str, true); // 忽略大小写
 	}
+
+	/**
+	 * 匹配文件
+	 *
+	 * @param patterns 匹配串集合
+	 * @param str      目标字符串
+	 * @return 是否匹配
+	 */
+	public static boolean match(Collection<String> patterns, String str) {
+		for (String pattern : patterns) {
+			if (match(pattern, str)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 
 	private static boolean equalsChar(char c1, char c2, boolean ignoreCase) {
 		if (c1 != c2) {
