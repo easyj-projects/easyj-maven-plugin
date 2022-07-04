@@ -59,7 +59,7 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 				.trim()
 				.replaceAll("\\s*\\{\\s*(finalName)\\s*\\}", project.getBuild().getFinalName())
 				.replaceAll("\\s*\\{\\s*(artifactId)\\s*\\}", project.getArtifactId())
-				.replaceAll("[:\\*\\?\\\"'\\<\\>\\|]+", "");
+				.replaceAll("[\\*\\?\\\"'\\<\\>\\|]+", "");
 
 		getLog().info("The release directory: " + releaseDirectory);
 
