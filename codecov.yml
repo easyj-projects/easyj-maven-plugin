@@ -1,0 +1,22 @@
+codecov:
+  token: 46c1813f-5877-4714-86c6-1411a43d025f
+  require_ci_to_pass: yes
+coverage:
+  status:
+    patch: no
+    project:
+      default:
+        threshold: 1%
+        if_not_found: success
+    changes: no
+  precision: 2
+  range: "40...100"
+ignore:
+  - ".gitee/.*"
+  - ".github/.*"
+  - "LICENSE"
+  - "*.md"
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: no
