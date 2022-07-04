@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>icu.easyj</groupId>
+		<artifactId>easyj-build</artifactId>
+		<version>1.0.45</version>
+		<relativePath/>
+	</parent>
+
+	<groupId>icu.easyj.maven.plugins</groupId>
+	<artifactId>easyj-maven-plugin</artifactId>
+	<version>0.7.3</version>
+	<packaging>maven-plugin</packaging>
+
+	<name>${project.groupId} :: ${project.artifactId}</name>
+	<description>EasyJ开发的Maven插件，包含：简化POM功能、Shade兼容Flatten功能</description>
+
+	<url>https://easyj.icu</url>
+
+	<scm>
+		<connection>scm:git@gitee.com:easyj-projects/easyj.git</connection>
+		<developerConnection>scm:git@gitee.com:easyj-projects/easyj.git</developerConnection>
+		<url>https://gitee.com/easyj-projects/easyj</url>
+	</scm>
+
+	<issueManagement>
+		<system>gitee</system>
+		<url>https://gitee.com/easyj-projects/easyj/issues</url>
+	</issueManagement>
+
+	<properties>
+		<mavenVersion>3.8.5</mavenVersion>
+		<mavenAnnotationsVersion>3.6.4</mavenAnnotationsVersion>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<version>${mavenVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-model</artifactId>
+			<version>${mavenVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-core</artifactId>
+			<version>${mavenVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<version>${mavenAnnotationsVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- 使用插件：Maven Plugin -->
+			<plugin>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>3.6.4</version>
+				<executions>
+					<execution>
+						<id>default-addPluginArtifactMetadata</id>
+						<phase>package</phase>
+						<goals>
+							<goal>addPluginArtifactMetadata</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-descriptor</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>descriptor</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- 使用插件：Source -->
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+			</plugin>
+			<!-- 使用插件：Easyj：Simplify-POM 使用当前插件的历史版本简化自己的pom.xml -->
+			<plugin>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>${project.artifactId}</artifactId>
+				<version>0.5.0</version><!-- 使用历史版本，否则会报错。 -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>simplify-pom</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
