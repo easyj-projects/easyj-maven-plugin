@@ -26,7 +26,6 @@ import icu.easyj.maven.plugin.mojo.utils.ObjectUtils;
 import icu.easyj.maven.plugin.mojo.utils.ZipUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -48,7 +47,7 @@ public class PackageZipMojo extends AbstractMojo {
 
 
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws MojoExecutionException {
 		if (ObjectUtils.isEmpty(paths)) {
 			getLog().warn("paths 不能为空");
 			return;

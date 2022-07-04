@@ -33,12 +33,10 @@ import icu.easyj.maven.plugin.mojo.utils.StringUtils;
 import icu.easyj.maven.plugin.mojo.utils.ZipUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 /**
  * spring-boot插件的协助插件
@@ -47,16 +45,9 @@ import org.apache.maven.project.MavenProject;
  * @since 0.6.8
  */
 @Mojo(name = "spring-boot-extend", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, threadSafe = true)
-public class SpringBootExtendMojo extends AbstractMojo {
+public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
-	@Parameter(defaultValue = "${project}", readonly = true, required = true)
-	private MavenProject project;
-
-	@Parameter(defaultValue = "${project.basedir}")
-	private File outputDirectory;
-
-
-	//region skip install and deploy
+	//region 功能1：skip install or deploy
 
 	@Parameter(defaultValue = "false")
 	private boolean skipInstall;
@@ -67,7 +58,7 @@ public class SpringBootExtendMojo extends AbstractMojo {
 	//endregion
 
 
-	//region includeGroupIds
+	//region 功能2：includeGroupIds
 
 	/**
 	 * 由于springboot官方不提供该功能，只提供 excludeGroupIds，所以这里提供该功能
@@ -91,6 +82,11 @@ public class SpringBootExtendMojo extends AbstractMojo {
 	@Parameter(property = "maven.spring-boot-extend.zipLib", defaultValue = "true")
 	private boolean zipLib;
 
+	//endregion
+
+
+	//region 功能3：创建startup文件
+
 	/**
 	 * 是否需要创建startup文件
 	 */
@@ -100,14 +96,14 @@ public class SpringBootExtendMojo extends AbstractMojo {
 	/**
 	 * spring-boot应用的startup脚本
 	 */
-	@Parameter(property = "maven.spring-boot-extend.startupScript", defaultValue = "java -jar {loaderPath} {finalName}.jar")
+	@Parameter(property = "maven.spring-boot-extend.startupScript", defaultValue = "java -jar ^ {loaderPath} ^ {finalName}.jar")
 	private String startupScript;
 
 	//endregion
 
 
 	@Override
-	public void execute() throws MojoExecutionException {
+	public void doExecute() throws MojoExecutionException {
 		//region 判断是否为springboot应用
 
 		boolean isSpringBootJar = false;
@@ -135,15 +131,20 @@ public class SpringBootExtendMojo extends AbstractMojo {
 		getLog().info("The current project is a springboot application.");
 
 
-		// skip install or deploy
+		// 功能1：skip install or deploy
 		this.skipInstallAndDeploy();
 
 
-		// includeGroupIds
+		// 功能2：includeGroupIds
 		String loaderPath = this.includeDependencies(springBootMavenPluginVersion);
-		// create startup files
+
+
+		// 功能3：创建startup文件
 		this.createStartupFile(loaderPath);
 	}
+
+
+	//region 功能1：skip install or deploy
 
 	private void skipInstallAndDeploy() {
 		Properties properties = project.getProperties();
@@ -164,6 +165,11 @@ public class SpringBootExtendMojo extends AbstractMojo {
 			}
 		}
 	}
+
+	//endregion
+
+
+	//region 功能2：includeGroupIds
 
 	private String includeDependencies(String springBootMavenPluginVersion) {
 		if (ObjectUtils.isEmpty(includeGroupIds)) {
@@ -341,34 +347,6 @@ public class SpringBootExtendMojo extends AbstractMojo {
 		return true;
 	}
 
-	private void createStartupFile(String loaderPath) {
-		if (!needCreateStartupFile) {
-			return;
-		}
-
-		this.emptyLine();
-
-		String startupScript = this.startupScript
-				.replaceAll("\\s*\\{\\s*loaderPath\\s*\\}", (ObjectUtils.isNotEmpty(loaderPath) ? " -Dloader.path=\"" + loaderPath + "\"" : ""))
-				.replaceAll("\\s*\\{\\s*(finalName)\\s*\\}", " " + project.getBuild().getFinalName())
-				.replaceAll("\\s*\\{\\s*(artifactId)\\s*\\}", " " + project.getArtifactId());
-
-		// 创建startup.bat文件
-		createStartupFile("bat", startupScript + "\r\ncmd");
-		// 创建startup.sh文件
-		createStartupFile("sh", "#!/bin/sh\r\n" + startupScript + "\r\n");
-	}
-
-	private void createStartupFile(String fileSuffix, String startupScriptText) {
-		File file = new File(outputDirectory.getPath() + "\\target\\startup." + fileSuffix);
-		try {
-			IOUtils.createFile(file, startupScriptText);
-			getLog().info("Create startup file succeeded: " + file.getName());
-		} catch (IOException e) {
-			getLog().error("Create startup file failed: " + file.getName(), e);
-		}
-	}
-
 	private boolean isCommonJar(Artifact artifact, Set<String> commonDependencyPatternSet) {
 		for (String commonArtifactPattern : commonDependencyPatternSet) {
 			if (MatchUtils.match(commonArtifactPattern, artifact.getGroupId() + ":" + artifact.getArtifactId())) {
@@ -390,7 +368,39 @@ public class SpringBootExtendMojo extends AbstractMojo {
 				|| "runtime".equalsIgnoreCase(scope));
 	}
 
-	private void emptyLine() {
-		getLog().info("");
+	//endregion
+
+
+	//region 功能3：创建startup文件
+
+	private void createStartupFile(String loaderPath) {
+		if (!needCreateStartupFile) {
+			return;
+		}
+
+		this.emptyLine();
+
+		String startupScript = this.startupScript
+				.replaceAll("\\s*\\{\\s*loaderPath\\s*\\}", (ObjectUtils.isNotEmpty(loaderPath) ? " -Dloader.path=\"" + loaderPath + "\" ^" : ""))
+				.replaceAll("\\s*\\{\\s*(finalName)\\s*\\}", " " + project.getBuild().getFinalName())
+				.replaceAll("\\s*\\{\\s*(artifactId)\\s*\\}", " " + project.getArtifactId())
+				.replaceAll("\\s*(\\^|\\<br\\s*\\/\\>)(\\s|\\^|\\<br\\s*\\/\\>)*", " ^\r\n     ");
+
+		// 创建startup.bat文件
+		createStartupFile("bat", startupScript + "\r\n\r\ncmd\r\n");
+		// 创建startup.sh文件
+		createStartupFile("sh", "#!/bin/sh\r\n\r\n" + startupScript.replace('^', '\\') + "\r\n");
 	}
+
+	private void createStartupFile(String fileSuffix, String startupScriptText) {
+		File file = new File(outputDirectory.getPath() + "\\target\\startup." + fileSuffix);
+		try {
+			IOUtils.createFile(file, startupScriptText);
+			getLog().info("Create startup file succeeded: " + file.getName() + ", the startup script:\r\n===>\r\n" + startupScriptText.trim() + "\r\n<===\r\n");
+		} catch (IOException e) {
+			getLog().error("Create startup file failed: " + file.getName(), e);
+		}
+	}
+
+	//endregion
 }

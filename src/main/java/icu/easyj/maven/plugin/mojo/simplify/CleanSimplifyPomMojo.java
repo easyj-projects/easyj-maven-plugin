@@ -18,7 +18,6 @@ package icu.easyj.maven.plugin.mojo.simplify;
 import java.io.File;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
@@ -31,13 +30,13 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(name = "clean-simplify-pom", defaultPhase = LifecyclePhase.CLEAN, threadSafe = true)
 public class CleanSimplifyPomMojo extends AbstractSimplifyPomMojo {
 
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws MojoExecutionException {
 		File simplifiedPomFile = getSimplifiedPomFile();
 		if (simplifiedPomFile.isFile()) {
 			getLog().info("Deleting " + simplifiedPomFile.getPath());
 			boolean deleted = simplifiedPomFile.delete();
 			if (!deleted) {
-				throw new MojoFailureException("Could not delete " + simplifiedPomFile.getAbsolutePath());
+				throw new MojoExecutionException("Could not delete " + simplifiedPomFile.getAbsolutePath());
 			}
 		}
 	}
