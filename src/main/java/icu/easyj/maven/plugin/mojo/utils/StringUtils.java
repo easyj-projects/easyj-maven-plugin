@@ -15,6 +15,7 @@
  */
 package icu.easyj.maven.plugin.mojo.utils;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -96,4 +97,15 @@ public abstract class StringUtils {
 	}
 
 	//endregion
+
+	public static String toString(Collection coll) {
+		StringBuilder sb = new StringBuilder();
+		for (Object item : coll) {
+			if (sb.length() > 0) {
+				sb.append(",");
+			}
+			sb.append(item);
+		}
+		return sb.toString();
+	}
 }

@@ -16,11 +16,11 @@
 package icu.easyj.maven.plugin.mojo.springboot;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import icu.easyj.maven.plugin.mojo.utils.IOUtils;
 import icu.easyj.maven.plugin.mojo.utils.MatchUtils;
 import icu.easyj.maven.plugin.mojo.utils.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -37,9 +37,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Mojo(name = "spring-boot-release", defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true)
 public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 
+	/**
+	 * 需发布文件匹配串。
+	 */
 	@Parameter(property = "maven.spring-boot-release.filePatterns")
 	private Set<String> filePatterns;
-
 
 	/**
 	 * 发布文件夹路径，仅将打包文件复制过去.
@@ -48,72 +50,91 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 	private String releaseDirectory;
 
 
+	public SpringBootReleaseMojo() {
+		this.init();
+	}
+
+	/**
+	 * 初始化
+	 */
+	protected void init() {
+		filePatterns = new HashSet<>(3);
+		filePatterns.add("{finalName}.jar");
+		filePatterns.add("lib-*.zip");
+		filePatterns.add("startup.*");
+	}
+
+
 	@Override
 	public void doExecute() throws MojoExecutionException {
 		if (StringUtils.isEmpty(this.releaseDirectory)) {
-			throw new RuntimeException("releasePath不能为空");
+			throw new RuntimeException("'releaseDirectory' must be not empty.");
 		}
 
-		// 处理发布文件夹目录
-		String releaseDirectory = this.releaseDirectory
-				.trim()
-				.replaceAll("\\s*\\{\\s*(finalName)\\s*\\}", project.getBuild().getFinalName())
-				.replaceAll("\\s*\\{\\s*(artifactId)\\s*\\}", project.getArtifactId())
-				.replaceAll("[\\*\\?\\\"'\\<\\>\\|]+", "");
-
-		getLog().info("The release directory: " + releaseDirectory);
-
-		// 创建化发布文件夹目录实例
-		File releaseDir = new File(releaseDirectory);
-		if (!releaseDir.exists()) {
-			if (!releaseDir.mkdirs()) {
-				getLog().warn("创建发布文件夹失败：" + releaseDir.getPath());
-				return;
-			}
-		}
+		// 创建发布文件夹目录实例
+		File releaseDir = this.createReleaseDir();
 
 		// 创建target文件夹实例
-		File targetDir = new File(this.outputDirectory + "\\target\\");
+		File targetDir = this.getTargetDir();
 		if (!targetDir.exists()) {
-			throw new RuntimeException("target文件夹不存在");
-		}
-		if (!targetDir.isDirectory()) {
-			throw new RuntimeException(targetDir.getPath() + "不是文件夹");
+			throw new RuntimeException("The '/target/' directory is not exists.");
 		}
 
 		// 处理匹配串
-		Set<String> patterns = new HashSet<>();
-		for (String filePattern : this.filePatterns) {
-			if (StringUtils.isEmpty(filePattern)) {
-				continue;
-			}
-
-			patterns.add(filePattern
-					.trim()
-					.replaceAll("\\s*\\{\\s*(finalName)\\s*\\}", project.getBuild().getFinalName())
-					.replaceAll("\\s*\\{\\s*(artifactId)\\s*\\}", project.getArtifactId())
-			);
-		}
-		getLog().info("The file patterns: " + patterns);
+		Set<String> patterns = this.handleFilePatterns();
+		this.info("The file patterns: " + patterns);
 
 		// 匹配的文件复制到发布文件夹中
 		File[] files = targetDir.listFiles();
 		if (files != null) {
+			List<File> fileList = new ArrayList<>(files.length);
+
 			for (File file : files) {
 				if (!file.isFile()) {
 					continue;
 				}
 
 				if (MatchUtils.match(patterns, file.getName())) {
-					File copyFile = new File(releaseDir, file.getName());
-					try {
-						IOUtils.copy(file, copyFile);
-						getLog().info("Copy file '/target/" + file.getName() + "' to '" + copyFile.getPath() + "'.");
-					} catch (IOException e) {
-						getLog().warn("Copy file failed：" + file.getPath() + " -> " + copyFile.getPath(), e);
-					}
+					fileList.add(file);
 				}
 			}
+
+			this.copyFilesToDir(fileList, releaseDir, true);
 		}
+	}
+
+
+	private File createReleaseDir() {
+		// 处理发布文件夹目录
+		String releaseDirectory = this.handleReleaseDirectory();
+		this.info("The release directory: " + releaseDirectory);
+
+		File releaseDir = new File(releaseDirectory);
+
+		if (!releaseDir.exists()) {
+			if (!releaseDir.mkdirs()) {
+				throw new RuntimeException("Create release directory failed：" + releaseDir.getPath());
+			}
+		}
+
+		return releaseDir;
+	}
+
+	private String handleReleaseDirectory() {
+		return this.replacePlaceholder(this.releaseDirectory.trim())
+				.replaceAll("[\\*\\?\\\"'\\<\\>\\|]+", "");
+	}
+
+	private Set<String> handleFilePatterns() {
+		Set<String> patterns = new HashSet<>();
+		for (String filePattern : this.filePatterns) {
+			if (StringUtils.isEmpty(filePattern)) {
+				continue;
+			}
+
+			patterns.add(this.replacePlaceholder(filePattern.trim()));
+		}
+
+		return patterns;
 	}
 }

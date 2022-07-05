@@ -15,15 +15,12 @@
  */
 package icu.easyj.maven.plugin.mojo.springboot;
 
-import java.io.File;
 import java.util.List;
 
+import icu.easyj.maven.plugin.mojo.AbstractEasyjMojo;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 /**
  * 抽象的SpringBoot相关Mojo
@@ -31,14 +28,7 @@ import org.apache.maven.project.MavenProject;
  * @author wangliang181230
  * @since 0.7.4
  */
-public abstract class AbstractSpringBootMojo extends AbstractMojo {
-
-	@Parameter(defaultValue = "${project}", readonly = true, required = true)
-	protected MavenProject project;
-
-	@Parameter(defaultValue = "${project.basedir}")
-	protected File outputDirectory;
-
+public abstract class AbstractSpringBootMojo extends AbstractEasyjMojo {
 
 	protected String springBootMavenPluginVersion;
 
@@ -46,12 +36,13 @@ public abstract class AbstractSpringBootMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (!this.isSpringBootApplication()) {
-			getLog().info("Skip this goal, cause by this project is not a spring-boot application.");
+			this.info("Skip this goal, cause by this project is not a spring-boot application.");
 			return;
 		}
 
 		this.doExecute();
 	}
+
 
 	abstract void doExecute() throws MojoExecutionException, MojoFailureException;
 
@@ -65,8 +56,8 @@ public abstract class AbstractSpringBootMojo extends AbstractMojo {
 		if ("jar".equalsIgnoreCase(project.getPackaging())) {
 			List<Plugin> plugins = project.getBuildPlugins();
 			for (Plugin plugin : plugins) {
-				if ("org.springframework.boot".equalsIgnoreCase(plugin.getGroupId())
-						&& "spring-boot-maven-plugin".equalsIgnoreCase(plugin.getArtifactId())) {
+				if ("org.springframework.boot".equals(plugin.getGroupId())
+						&& "spring-boot-maven-plugin".equals(plugin.getArtifactId())) {
 					springBootMavenPluginVersion = plugin.getVersion();
 					return true;
 				}
@@ -74,10 +65,5 @@ public abstract class AbstractSpringBootMojo extends AbstractMojo {
 		}
 
 		return false;
-	}
-
-
-	protected void emptyLine() {
-		getLog().info("");
 	}
 }

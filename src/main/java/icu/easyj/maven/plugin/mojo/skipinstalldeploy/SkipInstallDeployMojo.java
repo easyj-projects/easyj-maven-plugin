@@ -15,14 +15,11 @@
  */
 package icu.easyj.maven.plugin.mojo.skipinstalldeploy;
 
-import java.util.Properties;
-
-import org.apache.maven.plugin.AbstractMojo;
+import icu.easyj.maven.plugin.mojo.AbstractEasyjMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 /**
  * 跳过 install和deploy 的goal
@@ -31,10 +28,7 @@ import org.apache.maven.project.MavenProject;
  * @since 0.6.3
  */
 @Mojo(name = "skip-install-deploy", defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true)
-public class SkipInstallDeployMojo extends AbstractMojo {
-
-	@Parameter(defaultValue = "${project}", readonly = true, required = true)
-	private MavenProject project;
+public class SkipInstallDeployMojo extends AbstractEasyjMojo {
 
 	@Parameter(defaultValue = "true")
 	private boolean skipInstall;
@@ -42,22 +36,20 @@ public class SkipInstallDeployMojo extends AbstractMojo {
 	@Parameter(defaultValue = "true")
 	private boolean skipDeploy;
 
+
 	@Override
 	public void execute() throws MojoExecutionException {
 		if (!skipInstall && !skipDeploy) {
-			getLog().info("Skip this goal, cause by \"skipInstall == false && skipDeploy == false\".");
+			this.info("Skip this goal, cause by \"skipInstall == false && skipDeploy == false\".");
 			return;
 		}
 
-		Properties properties = project.getProperties();
-		if (skipInstall && !"true".equalsIgnoreCase(properties.getProperty("maven.install.skip"))) {
-			properties.put("maven.install.skip", "true");
-			getLog().info("Put property 'maven.install.skip = true'.");
+		if (skipInstall && !this.containsProperty("maven.install.skip", "true")) {
+			putProperty("maven.install.skip", "true");
 		}
 
-		if (skipDeploy && !"true".equalsIgnoreCase(properties.getProperty("maven.deploy.skip"))) {
-			properties.put("maven.deploy.skip", "true");
-			getLog().info("Put property 'maven.deploy.skip = true'.");
+		if (skipDeploy && !this.containsProperty("maven.deploy.skip", "true")) {
+			putProperty("maven.deploy.skip", "true");
 		}
 	}
 }

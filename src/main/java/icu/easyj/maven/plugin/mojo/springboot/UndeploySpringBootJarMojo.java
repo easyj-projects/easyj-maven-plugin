@@ -18,13 +18,12 @@ package icu.easyj.maven.plugin.mojo.springboot;
 import java.util.List;
 import java.util.Properties;
 
+import icu.easyj.maven.plugin.mojo.AbstractEasyjMojo;
 import org.apache.maven.model.Plugin;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 /**
  * 设置不上传springboot打的包 的 Goal，因为springboot打的包并不是依赖包，无法作为依赖被引用，deploy了也没有用处，而且非常的大，很占用磁盘空间。
@@ -35,11 +34,7 @@ import org.apache.maven.project.MavenProject;
  */
 @Deprecated
 @Mojo(name = "undeploy-spring-boot-jar", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, threadSafe = true)
-public class UndeploySpringBootJarMojo extends AbstractMojo {
-
-	@Parameter(defaultValue = "${project}", readonly = true, required = true)
-	private MavenProject project;
-
+public class UndeploySpringBootJarMojo extends AbstractEasyjMojo {
 
 	@Parameter(defaultValue = "true")
 	private boolean skipInstall;
@@ -51,12 +46,12 @@ public class UndeploySpringBootJarMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		if (!skipInstall && !skipDeploy) {
-			getLog().info("Skip this goal, cause by \"skipInstall == false && skipDeploy == false\".");
+			this.info("Skip this goal, cause by \"skipInstall == false && skipDeploy == false\".");
 			return;
 		}
 
 		if (!"jar".equalsIgnoreCase(project.getPackaging())) {
-			getLog().info("Skip this goal, cause by \"packaging != 'jar'\"'.");
+			this.info("Skip this goal, cause by \"packaging != 'jar'\"'.");
 			return;
 		}
 
@@ -72,20 +67,20 @@ public class UndeploySpringBootJarMojo extends AbstractMojo {
 		}
 
 		if (isSpringBootJar) {
-			getLog().info("The current project is a springboot application, it will not be installed or deployed.");
+			this.info("The current project is a springboot application, it will not be installed or deployed.");
 
 			Properties properties = project.getProperties();
 			if (skipInstall && !"true".equalsIgnoreCase(properties.getProperty("maven.install.skip"))) {
 				properties.put("maven.install.skip", "true");
-				getLog().info("Put property 'maven.install.skip = true'.");
+				this.info("Put property 'maven.install.skip = true'.");
 			}
 
 			if (skipDeploy && !"true".equalsIgnoreCase(properties.getProperty("maven.deploy.skip"))) {
 				properties.put("maven.deploy.skip", "true");
-				getLog().info("Put property 'maven.deploy.skip = true'.");
+				this.info("Put property 'maven.deploy.skip = true'.");
 			}
 		} else {
-			getLog().info("Skip this goal, cause by this project is not a spring-boot application.");
+			this.info("Skip this goal, cause by this project is not a spring-boot application.");
 		}
 	}
 }

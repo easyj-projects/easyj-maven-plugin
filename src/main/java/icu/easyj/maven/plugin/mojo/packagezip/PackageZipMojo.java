@@ -49,11 +49,11 @@ public class PackageZipMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		if (ObjectUtils.isEmpty(paths)) {
-			getLog().warn("paths 不能为空");
+			getLog().warn("'paths' must not be empty.");
 			return;
 		}
 		if (ObjectUtils.isEmpty(outputFilePathname)) {
-			getLog().warn("outputFile 不能为空");
+			getLog().warn("'outputFilePathname' must not be empty.");
 			return;
 		}
 
