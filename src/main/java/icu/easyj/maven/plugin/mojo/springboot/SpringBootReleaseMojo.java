@@ -40,7 +40,7 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 	/**
 	 * 需发布文件匹配串。
 	 */
-	@Parameter(property = "maven.spring-boot-release.filePatterns")
+	@Parameter(property = "maven.spring-boot-release.filePatterns", defaultValue = "{finalName}.jar,lib-*.zip,startup.*")
 	private Set<String> filePatterns;
 
 	/**
@@ -48,21 +48,6 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 	 */
 	@Parameter(property = "maven.spring-boot-release.dir")
 	private String releaseDirectory;
-
-
-	public SpringBootReleaseMojo() {
-		this.init();
-	}
-
-	/**
-	 * 初始化
-	 */
-	protected void init() {
-		filePatterns = new HashSet<>(3);
-		filePatterns.add("{finalName}.jar");
-		filePatterns.add("lib-*.zip");
-		filePatterns.add("startup.*");
-	}
 
 
 	@Override
@@ -106,7 +91,8 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 
 	private File createReleaseDir() {
 		// 处理发布文件夹目录
-		String releaseDirectory = this.handleReleaseDirectory();
+		String releaseDirectory = this.replacePlaceholder(this.releaseDirectory.trim())
+				.replaceAll("[\\*\\?\\\"'\\<\\>\\|]+", ""); // 移除部分特殊字符
 		this.info("The release directory: " + releaseDirectory);
 
 		File releaseDir = new File(releaseDirectory);
@@ -118,11 +104,6 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 		}
 
 		return releaseDir;
-	}
-
-	private String handleReleaseDirectory() {
-		return this.replacePlaceholder(this.releaseDirectory.trim())
-				.replaceAll("[\\*\\?\\\"'\\<\\>\\|]+", "");
 	}
 
 	private Set<String> handleFilePatterns() {
