@@ -41,17 +41,17 @@ public class SimplifyPomMojo extends AbstractSimplifyPomMojo {
 	@Parameter(defaultValue = "${project}", readonly = true, required = true)
 	private MavenProject project;
 
-	@Parameter(defaultValue = "false", property = "maven.simplify.skip")
+	@Parameter(property = "maven.simplify.skip", defaultValue = "false")
 	private boolean skip;
 
 
 	/**
 	 * 简化模式
 	 */
-	@Parameter(defaultValue = AUTO, property = "maven.simplify.mode")
+	@Parameter(property = "maven.simplify.mode", defaultValue = AUTO)
 	private String simplifyMode;
 
-	@Parameter(defaultValue = "false", property = "maven.simplify.expandImportDependencyManagement")
+	@Parameter(property = "maven.simplify.expandImportDependencyManagement", defaultValue = "false")
 	boolean expandImportDependencyManagement;
 
 	/**
@@ -63,7 +63,7 @@ public class SimplifyPomMojo extends AbstractSimplifyPomMojo {
 	/**
 	 * 是否用于开源项目
 	 */
-	@Parameter(defaultValue = "true")
+	@Parameter(property = "maven.simplify.isOpenSourceProject", defaultValue = "true")
 	boolean isOpenSourceProject;
 
 	@Parameter

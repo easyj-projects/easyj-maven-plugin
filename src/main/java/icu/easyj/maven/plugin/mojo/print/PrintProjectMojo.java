@@ -41,7 +41,7 @@ public class PrintProjectMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project}", readonly = true, required = true)
 	private MavenProject project;
 
-	@Parameter(defaultValue = "false", property = "maven.print.skip")
+	@Parameter(property = "maven.print.skip", defaultValue = "false")
 	private boolean skip;
 
 	@Parameter(defaultValue = "true")
@@ -50,7 +50,7 @@ public class PrintProjectMojo extends AbstractMojo {
 	@Parameter(defaultValue = "true")
 	private boolean printOriginalModel;
 
-	@Parameter(defaultValue = "false", property = "maven.print.detail")
+	@Parameter(property = "maven.print.detail", defaultValue = "false")
 	private boolean printDetail;
 
 	@Override
