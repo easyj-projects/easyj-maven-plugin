@@ -15,11 +15,13 @@
  */
 package icu.easyj.maven.plugin.mojo.skipinstalldeploy;
 
+import java.util.Properties;
+
 import icu.easyj.maven.plugin.mojo.AbstractEasyjMojo;
+import icu.easyj.maven.plugin.mojo.utils.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * 跳过 install和deploy 的goal
@@ -27,29 +29,36 @@ import org.apache.maven.plugins.annotations.Parameter;
  * @author wangliang181230
  * @since 0.6.3
  */
-@Mojo(name = "skip-install-deploy", defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true)
+@Mojo(name = "skip-install-deploy", defaultPhase = LifecyclePhase.INITIALIZE, threadSafe = true)
 public class SkipInstallDeployMojo extends AbstractEasyjMojo {
-
-	@Parameter(defaultValue = "true")
-	private boolean skipInstall;
-
-	@Parameter(defaultValue = "true")
-	private boolean skipDeploy;
-
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		if (!skipInstall && !skipDeploy) {
-			this.info("Skip this goal, cause by \"skipInstall == false && skipDeploy == false\".");
-			return;
-		}
+		// 以下这三个properties，仅对当前POM有效。'isTrue(key)' 方法中，获取的是 'originalModel' 中的 `Properties`
+		boolean skipInstallAndDeploy = Boolean.TRUE.equals(isTrue("maven.easyj.skipInstallAndDeploy"));
+		Boolean skipInstall = isTrue("maven.easyj.skipInstall");
+		Boolean skipDeploy = isTrue("maven.easyj.skipDeploy");
 
-		if (skipInstall && !this.containsProperty("maven.install.skip", "true")) {
+		if (skipInstall != null ? skipInstall : skipInstallAndDeploy) {
 			putProperty("maven.install.skip", "true");
 		}
 
-		if (skipDeploy && !this.containsProperty("maven.deploy.skip", "true")) {
+		if (skipDeploy != null ? skipDeploy : skipInstallAndDeploy) {
 			putProperty("maven.deploy.skip", "true");
 		}
+	}
+
+	public Boolean isTrue(String originalPropertyKey) {
+		Properties originalProperties = getOriginalProperties();
+		if (originalProperties == null) {
+			return null;
+		}
+
+		String propertyValue = originalProperties.getProperty(originalPropertyKey);
+		if (StringUtils.isEmpty(propertyValue)) {
+			return null;
+		}
+
+		return "true".equalsIgnoreCase(propertyValue);
 	}
 }

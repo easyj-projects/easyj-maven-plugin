@@ -75,7 +75,11 @@ public abstract class AbstractEasyjMojo extends AbstractMojo {
 	//endregion
 
 
-	//region 设置 property
+	//region property相关
+
+	protected Properties getOriginalProperties() {
+		return project.getOriginalModel().getProperties();
+	}
 
 	protected String getProperty(String key) {
 		return project.getProperties().getProperty(key);

@@ -111,7 +111,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 
 		// 功能2：includeGroupIds
-		String loaderPath = this.includeDependencies(springBootMavenPluginVersion);
+		String loaderPath = this.includeDependencies();
 
 
 		// 功能3：创建startup文件
@@ -146,7 +146,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 	//region 功能2：includeGroupIds
 
-	private String includeDependencies(String springBootMavenPluginVersion) {
+	private String includeDependencies() {
 		if (ObjectUtils.isEmpty(includeGroupIds)) {
 			return null;
 		}
