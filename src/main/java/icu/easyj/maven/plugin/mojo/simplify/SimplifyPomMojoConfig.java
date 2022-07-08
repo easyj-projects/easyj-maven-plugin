@@ -15,7 +15,9 @@
  */
 package icu.easyj.maven.plugin.mojo.simplify;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import icu.easyj.maven.plugin.mojo.utils.MatchUtils;
 import icu.easyj.maven.plugin.mojo.utils.ObjectUtils;
@@ -81,6 +83,10 @@ public class SimplifyPomMojoConfig {
 		}
 
 		return false;
+	}
+
+	public Set<String> getRemoveLocalProperties() {
+		return mojo.removeLocalProperties == null ? Collections.emptySet() : mojo.removeLocalProperties;
 	}
 
 	public Map<String, String> getCreateProperties() {

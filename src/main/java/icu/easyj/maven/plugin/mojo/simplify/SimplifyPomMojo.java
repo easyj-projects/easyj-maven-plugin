@@ -81,6 +81,9 @@ public class SimplifyPomMojo extends AbstractSimplifyPomMojo {
 	@Parameter
 	Set<String> excludeDependencies;
 
+	@Parameter(property = "maven.simplify.removeLocalProperties")
+	Set<String> removeLocalProperties;
+
 	@Parameter
 	Map<String, String> createProperties;
 

@@ -40,6 +40,8 @@ public class PomSimplifier extends AbstractPomSimplifier {
 
 		this.resetVersion();
 		this.resetNameAndDescription();
+
+		this.removeLocalProperties();
 	}
 
 

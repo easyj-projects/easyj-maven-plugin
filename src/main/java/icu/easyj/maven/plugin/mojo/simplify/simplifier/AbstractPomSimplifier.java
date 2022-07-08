@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 import icu.easyj.maven.plugin.mojo.simplify.SimplifyPomMojoConfig;
+import icu.easyj.maven.plugin.mojo.utils.ObjectUtils;
+import icu.easyj.maven.plugin.mojo.utils.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -726,6 +728,25 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 		if (configDom.getChildren().length == 0) {
 			this.log.info("Remove Configuration from the plugin '" + plugin.getId() + "'.");
 			plugin.setConfiguration(null);
+		}
+	}
+
+	protected void removeLocalProperties() {
+		Properties originalProperties = this.project.getOriginalModel().getProperties();
+		if (ObjectUtils.isEmpty(originalProperties)) {
+			return;
+		}
+
+		Set<String> removeLocalProperties = config.getRemoveLocalProperties();
+		if (!removeLocalProperties.isEmpty()) {
+			this.log.info("Remove the local properties:");
+			for (String removeLocalPropertyKey : removeLocalProperties) {
+				removeLocalPropertyKey = removeLocalPropertyKey.trim();
+				if (StringUtils.isNotEmpty(removeLocalPropertyKey) && originalProperties.containsKey(removeLocalPropertyKey)) {
+					originalProperties.remove(removeLocalPropertyKey);
+					this.log.info("  - Remove property '" + removeLocalPropertyKey + "'");
+				}
+			}
 		}
 	}
 
