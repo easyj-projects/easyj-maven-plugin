@@ -22,6 +22,7 @@ import icu.easyj.maven.plugin.mojo.utils.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * 跳过 install和deploy 的goal
@@ -32,17 +33,24 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(name = "skip-install-deploy", defaultPhase = LifecyclePhase.INITIALIZE, threadSafe = true)
 public class SkipInstallDeployMojo extends AbstractEasyjMojo {
 
+	@Parameter
+	private Boolean skipInstall;
+
+	@Parameter
+	private Boolean skipDeploy;
+
+
 	@Override
 	public void execute() throws MojoExecutionException {
 		// 以下这三个properties，仅对当前POM有效。'isTrue(key)' 方法中，获取的是 'originalModel' 中的 `Properties`
 		boolean skipInstallAndDeploy = Boolean.TRUE.equals(isTrue("maven.easyj.skipInstallAndDeploy"));
-		Boolean skipInstall = isTrue("maven.easyj.skipInstall");
-		Boolean skipDeploy = isTrue("maven.easyj.skipDeploy");
+
+		Boolean skipInstall = this.skipInstall != null ? this.skipInstall : isTrue("maven.easyj.skipInstall");
+		Boolean skipDeploy = this.skipDeploy != null ? this.skipDeploy : isTrue("maven.easyj.skipDeploy");
 
 		if (skipInstall != null ? skipInstall : skipInstallAndDeploy) {
 			putProperty("maven.install.skip", "true");
 		}
-
 		if (skipDeploy != null ? skipDeploy : skipInstallAndDeploy) {
 			putProperty("maven.deploy.skip", "true");
 		}
