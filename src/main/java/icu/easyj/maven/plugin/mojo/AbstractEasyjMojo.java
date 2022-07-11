@@ -31,7 +31,7 @@ import org.apache.maven.project.MavenProject;
  * 抽象Mojo
  *
  * @author wangliang181230
- * @since 0.7.5
+ * @since 1.0.0
  */
 public abstract class AbstractEasyjMojo extends AbstractMojo {
 

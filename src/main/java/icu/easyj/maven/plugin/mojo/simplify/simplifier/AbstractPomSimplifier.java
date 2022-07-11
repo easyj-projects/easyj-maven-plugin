@@ -731,6 +731,11 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 		}
 	}
 
+	/**
+	 * 移除当前POM中不需要了的properties
+	 *
+	 * @since 1.0.0
+	 */
 	protected void removeLocalProperties() {
 		Properties originalProperties = this.project.getOriginalModel().getProperties();
 		if (ObjectUtils.isEmpty(originalProperties)) {
