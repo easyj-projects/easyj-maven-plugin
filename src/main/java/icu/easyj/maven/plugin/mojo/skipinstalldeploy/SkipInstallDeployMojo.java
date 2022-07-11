@@ -34,6 +34,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 public class SkipInstallDeployMojo extends AbstractEasyjMojo {
 
 	@Parameter
+	private Boolean skipInstallAndDeploy;
+
+	@Parameter
 	private Boolean skipInstall;
 
 	@Parameter
@@ -43,7 +46,7 @@ public class SkipInstallDeployMojo extends AbstractEasyjMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		// 以下这三个properties，仅对当前POM有效。'isTrue(key)' 方法中，获取的是 'originalModel' 中的 `Properties`
-		boolean skipInstallAndDeploy = Boolean.TRUE.equals(isTrue("maven.easyj.skipInstallAndDeploy"));
+		boolean skipInstallAndDeploy = this.skipInstallAndDeploy != null ? this.skipInstallAndDeploy : Boolean.TRUE.equals(isTrue("maven.easyj.skipInstallAndDeploy"));
 
 		Boolean skipInstall = this.skipInstall != null ? this.skipInstall : isTrue("maven.easyj.skipInstall");
 		Boolean skipDeploy = this.skipDeploy != null ? this.skipDeploy : isTrue("maven.easyj.skipDeploy");
