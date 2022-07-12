@@ -87,6 +87,8 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 			throws MojoExecutionException {
 		// 不同的maven版本，换行数量有些微不同，将多个连续的换行替换成单个换行
 		data = data.replaceAll("(\r?\n){2,}", "\r\n");
+		// 去除多余的空格
+		data = data.replace(" />", "/>");
 
 		byte[] binaryData;
 		try {
