@@ -31,23 +31,13 @@
 	</issueManagement>
 
 	<properties>
-		<mavenVersion>3.8.5</mavenVersion>
+		<mavenVersion>3.8.6</mavenVersion>
 		<mavenAnnotationsVersion>3.6.4</mavenAnnotationsVersion>
+
+		<junit.version>5.8.2</junit.version>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-plugin-api</artifactId>
-			<version>${mavenVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-model</artifactId>
-			<version>${mavenVersion}</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
@@ -59,6 +49,13 @@
 			<artifactId>maven-plugin-annotations</artifactId>
 			<version>${mavenAnnotationsVersion}</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

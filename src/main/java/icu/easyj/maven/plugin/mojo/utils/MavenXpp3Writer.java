@@ -70,7 +70,12 @@ public class MavenXpp3Writer {
 
 	private static final String NAMESPACE = null;
 
+	private static final String LINE_SEPARATOR = System.getProperty("os.name").contains("Windows") ? "\r\n" : "\n";
+
+
 	private String fileComment = null;
+
+	private boolean useTabIndent = false;
 
 
 	//------------------/
@@ -81,11 +86,16 @@ public class MavenXpp3Writer {
 		this.fileComment = fileComment;
 	}
 
+	public void setUseTabIndent(boolean useTabIndent) {
+		this.useTabIndent = useTabIndent;
+	}
+
 	public void write(Writer writer, Model model)
 			throws java.io.IOException {
 		MXSerializer serializer = new MXSerializer();
-		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-indentation", "  ");
-		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-line-separator", "\n");
+		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-indentation", this.useTabIndent ? "\t" : "  ");
+		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-line-separator", LINE_SEPARATOR);
+
 		serializer.setOutput(writer);
 		serializer.startDocument(model.getModelEncoding(), null);
 		writeModel(model, serializer);
@@ -564,12 +574,17 @@ public class MavenXpp3Writer {
 
 	private void writeModel(Model model, MXSerializer serializer) throws java.io.IOException {
 		if (this.fileComment != null) {
+			serializer.text(LINE_SEPARATOR);
 			serializer.comment(this.fileComment);
 		}
-		serializer.setPrefix("", "http://maven.apache.org/POM/4.0.0");
-		serializer.setPrefix("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		serializer.text(LINE_SEPARATOR);
+
+		//serializer.setPrefix("", "http://maven.apache.org/POM/4.0.0");
+		//serializer.setPrefix("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		serializer.startTag(NAMESPACE, "project");
-		serializer.attribute("", "xsi:schemaLocation", "http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd");
+		//serializer.attribute("", "xsi:schemaLocation", "http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd");
+		serializer.getWriter().write(" xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+
 		if (model.getChildProjectUrlInheritAppendPath() != null) {
 			serializer.attribute(NAMESPACE, "child.project.url.inherit.append.path", model.getChildProjectUrlInheritAppendPath());
 		}
