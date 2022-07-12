@@ -23,8 +23,8 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
 
+import icu.easyj.maven.plugin.mojo.utils.MavenXpp3Writer;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -45,6 +45,12 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 	@Parameter(property = "maven.simplify.simplifiedPomFileName", defaultValue = ".simplified-pom.xml")
 	protected String simplifiedPomFileName;
 
+	@Parameter(property = "maven.simplify.fileComment")
+	private String fileComment;
+
+	@Parameter(property = "maven.simplify.useTabIndent", defaultValue = "false")
+	private boolean useTabIndent;
+
 
 	protected File getSimplifiedPomFile() {
 		return new File(this.outputDirectory, this.simplifiedPomFileName);
@@ -60,8 +66,11 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 			}
 		}
 
-		// Write POM
+		// Model to String
 		MavenXpp3Writer pomWriter = new MavenXpp3Writer();
+		pomWriter.setFileComment(this.fileComment);
+		pomWriter.setUseTabIndent(this.useTabIndent);
+
 		StringWriter stringWriter = new StringWriter(POM_WRITER_SIZE);
 		try {
 			pomWriter.write(stringWriter, model);
@@ -69,16 +78,14 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 			throw new MojoExecutionException("Internal I/O error!", e);
 		}
 		StringBuffer buffer = stringWriter.getBuffer();
+
+		// Write String to POM file
 		this.writeStringToFile(buffer.toString(), pomFile, model.getModelEncoding());
 	}
 
 	private void writeStringToFile(String data, File file, String encoding)
 			throws MojoExecutionException {
-		if (System.getProperty("os.name").contains("Windows")) {
-			data = data.replaceAll("\r?\n", "\r\n");
-		}
 		byte[] binaryData;
-
 		try {
 			binaryData = data.getBytes(encoding);
 			if (file.isFile() && file.canRead() && file.length() == binaryData.length) {
