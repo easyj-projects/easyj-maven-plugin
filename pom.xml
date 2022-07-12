@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>icu.easyj</groupId>
 		<artifactId>easyj-build</artifactId>
-		<version>1.0.45</version>
+		<version>1.0.46</version>
 		<relativePath/>
 	</parent>
 
@@ -88,22 +88,6 @@
 				<configuration>
 					<attach>true</attach>
 				</configuration>
-			</plugin>
-			<!-- 使用插件：Easyj：Simplify-POM 使用当前插件的历史版本简化自己的pom.xml -->
-			<plugin>
-				<groupId>${project.groupId}</groupId>
-				<artifactId>${project.artifactId}</artifactId>
-				<version>1.0.1</version><!-- 使用历史版本，否则会报错。 -->
-				<executions>
-					<execution>
-						<goals>
-							<goal>simplify-pom</goal>
-						</goals>
-						<configuration>
-							<useTabIndent>true</useTabIndent>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
