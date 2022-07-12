@@ -20,14 +20,14 @@
 	<url>https://easyj.icu</url>
 
 	<scm>
-		<connection>scm:git@gitee.com:easyj-projects/easyj.git</connection>
-		<developerConnection>scm:git@gitee.com:easyj-projects/easyj.git</developerConnection>
-		<url>https://gitee.com/easyj-projects/easyj</url>
+		<connection>scm:git@github.com:easyj-projects/easyj-maven-plugin.git</connection>
+		<developerConnection>scm:git@github.com:easyj-projects/easyj-maven-plugin.git</developerConnection>
+		<url>https://github.com/easyj-projects/easyj-maven-plugin</url>
 	</scm>
 
 	<issueManagement>
-		<system>gitee</system>
-		<url>https://gitee.com/easyj-projects/easyj/issues</url>
+		<system>github</system>
+		<url>https://github.com/easyj-projects/easyj-maven-plugin/issues</url>
 	</issueManagement>
 
 	<properties>
@@ -93,12 +93,15 @@
 			<plugin>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>${project.artifactId}</artifactId>
-				<version>0.5.0</version><!-- 使用历史版本，否则会报错。 -->
+				<version>1.0.1</version><!-- 使用历史版本，否则会报错。 -->
 				<executions>
 					<execution>
 						<goals>
 							<goal>simplify-pom</goal>
 						</goals>
+						<configuration>
+							<useTabIndent>true</useTabIndent>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
