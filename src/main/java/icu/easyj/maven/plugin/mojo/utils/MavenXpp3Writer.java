@@ -15,7 +15,10 @@
  */
 package icu.easyj.maven.plugin.mojo.utils;
 
+import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.ActivationFile;
@@ -90,8 +93,7 @@ public class MavenXpp3Writer {
 		this.useTabIndent = useTabIndent;
 	}
 
-	public void write(Writer writer, Model model)
-			throws java.io.IOException {
+	public void write(Writer writer, Model model) throws IOException {
 		MXSerializer serializer = new MXSerializer();
 		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-indentation", this.useTabIndent ? "\t" : "  ");
 		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-line-separator", LINE_SEPARATOR);
@@ -107,14 +109,13 @@ public class MavenXpp3Writer {
 	//- Private Methods -/
 	//-------------------/
 
-	private void writeActivation(Activation activation, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeActivation(Activation activation, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "activation");
 		if (activation.isActiveByDefault()) {
-			serializer.startTag(NAMESPACE, "activeByDefault").text(String.valueOf(activation.isActiveByDefault())).endTag(NAMESPACE, "activeByDefault");
+			this.write("activeByDefault", String.valueOf(activation.isActiveByDefault()), serializer);
 		}
 		if (activation.getJdk() != null) {
-			serializer.startTag(NAMESPACE, "jdk").text(activation.getJdk()).endTag(NAMESPACE, "jdk");
+			this.write("jdk", activation.getJdk(), serializer);
 		}
 		if (activation.getOs() != null) {
 			writeActivationOS(activation.getOs(), serializer);
@@ -128,276 +129,208 @@ public class MavenXpp3Writer {
 		serializer.endTag(NAMESPACE, "activation");
 	}
 
-	private void writeActivationFile(ActivationFile activationFile, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeActivationFile(ActivationFile activationFile, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "file");
 		if (activationFile.getMissing() != null) {
-			serializer.startTag(NAMESPACE, "missing").text(activationFile.getMissing()).endTag(NAMESPACE, "missing");
+			this.write("missing", activationFile.getMissing(), serializer);
 		}
 		if (activationFile.getExists() != null) {
-			serializer.startTag(NAMESPACE, "exists").text(activationFile.getExists()).endTag(NAMESPACE, "exists");
+			this.write("exists", activationFile.getExists(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "file");
 	}
 
-	private void writeActivationOS(ActivationOS activationOS, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeActivationOS(ActivationOS activationOS, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "os");
 		if (activationOS.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(activationOS.getName()).endTag(NAMESPACE, "name");
+			this.write("name", activationOS.getName(), serializer);
 		}
 		if (activationOS.getFamily() != null) {
-			serializer.startTag(NAMESPACE, "family").text(activationOS.getFamily()).endTag(NAMESPACE, "family");
+			this.write("family", activationOS.getFamily(), serializer);
 		}
 		if (activationOS.getArch() != null) {
-			serializer.startTag(NAMESPACE, "arch").text(activationOS.getArch()).endTag(NAMESPACE, "arch");
+			this.write("arch", activationOS.getArch(), serializer);
 		}
 		if (activationOS.getVersion() != null) {
-			serializer.startTag(NAMESPACE, "version").text(activationOS.getVersion()).endTag(NAMESPACE, "version");
+			this.write("version", activationOS.getVersion(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "os");
 	}
 
-	private void writeActivationProperty(ActivationProperty activationProperty, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeActivationProperty(ActivationProperty activationProperty, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "property");
 		if (activationProperty.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(activationProperty.getName()).endTag(NAMESPACE, "name");
+			this.write("name", activationProperty.getName(), serializer);
 		}
 		if (activationProperty.getValue() != null) {
-			serializer.startTag(NAMESPACE, "value").text(activationProperty.getValue()).endTag(NAMESPACE, "value");
+			this.write("value", activationProperty.getValue(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "property");
 	}
 
-	private void writeBuild(Build build, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeBuild(Build build, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "build");
 		if (build.getSourceDirectory() != null) {
-			serializer.startTag(NAMESPACE, "sourceDirectory").text(build.getSourceDirectory()).endTag(NAMESPACE, "sourceDirectory");
+			this.write("sourceDirectory", build.getSourceDirectory(), serializer);
 		}
 		if (build.getScriptSourceDirectory() != null) {
-			serializer.startTag(NAMESPACE, "scriptSourceDirectory").text(build.getScriptSourceDirectory()).endTag(NAMESPACE, "scriptSourceDirectory");
+			this.write("scriptSourceDirectory", build.getScriptSourceDirectory(), serializer);
 		}
 		if (build.getTestSourceDirectory() != null) {
-			serializer.startTag(NAMESPACE, "testSourceDirectory").text(build.getTestSourceDirectory()).endTag(NAMESPACE, "testSourceDirectory");
+			this.write("testSourceDirectory", build.getTestSourceDirectory(), serializer);
 		}
 		if (build.getOutputDirectory() != null) {
-			serializer.startTag(NAMESPACE, "outputDirectory").text(build.getOutputDirectory()).endTag(NAMESPACE, "outputDirectory");
+			this.write("outputDirectory", build.getOutputDirectory(), serializer);
 		}
 		if (build.getTestOutputDirectory() != null) {
-			serializer.startTag(NAMESPACE, "testOutputDirectory").text(build.getTestOutputDirectory()).endTag(NAMESPACE, "testOutputDirectory");
+			this.write("testOutputDirectory", build.getTestOutputDirectory(), serializer);
 		}
 		if ((build.getExtensions() != null) && (build.getExtensions().size() > 0)) {
-			serializer.startTag(NAMESPACE, "extensions");
-			for (Extension o : build.getExtensions()) {
-				writeExtension(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "extensions");
+			this.writeList("extensions", build.getExtensions(), this::writeExtension, serializer);
 		}
 		if (build.getDefaultGoal() != null) {
-			serializer.startTag(NAMESPACE, "defaultGoal").text(build.getDefaultGoal()).endTag(NAMESPACE, "defaultGoal");
+			this.write("defaultGoal", build.getDefaultGoal(), serializer);
 		}
 		if ((build.getResources() != null) && (build.getResources().size() > 0)) {
-			serializer.startTag(NAMESPACE, "resources");
-			for (Resource o : build.getResources()) {
-				writeResource(o, "resource", serializer);
-			}
-			serializer.endTag(NAMESPACE, "resources");
+			this.writeList("resources", "resource", build.getResources(), this::writeResource, serializer);
 		}
 		if ((build.getTestResources() != null) && (build.getTestResources().size() > 0)) {
-			serializer.startTag(NAMESPACE, "testResources");
-			for (Resource o : build.getTestResources()) {
-				writeResource(o, "testResource", serializer);
-			}
-			serializer.endTag(NAMESPACE, "testResources");
+			this.writeList("testResources", "testResource", build.getTestResources(), this::writeResource, serializer);
 		}
 		if (build.getDirectory() != null) {
-			serializer.startTag(NAMESPACE, "directory").text(build.getDirectory()).endTag(NAMESPACE, "directory");
+			this.write("directory", build.getDirectory(), serializer);
 		}
 		if (build.getFinalName() != null) {
-			serializer.startTag(NAMESPACE, "finalName").text(build.getFinalName()).endTag(NAMESPACE, "finalName");
+			this.write("finalName", build.getFinalName(), serializer);
 		}
 		if ((build.getFilters() != null) && (build.getFilters().size() > 0)) {
-			serializer.startTag(NAMESPACE, "filters");
-			for (String filter : build.getFilters()) {
-				serializer.startTag(NAMESPACE, "filter").text(filter).endTag(NAMESPACE, "filter");
-			}
-			serializer.endTag(NAMESPACE, "filters");
+			this.writeList("filters", "filter", build.getFilters(), serializer);
 		}
 		if (build.getPluginManagement() != null) {
 			writePluginManagement(build.getPluginManagement(), serializer);
 		}
 		if ((build.getPlugins() != null) && (build.getPlugins().size() > 0)) {
-			serializer.startTag(NAMESPACE, "plugins");
-			for (Plugin o : build.getPlugins()) {
-				writePlugin(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "plugins");
+			this.writeList("plugins", build.getPlugins(), this::writePlugin, serializer);
 		}
 		serializer.endTag(NAMESPACE, "build");
 	}
 
-	private void writeBuildBase(BuildBase buildBase, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeBuildBase(BuildBase buildBase, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "build");
 		if (buildBase.getDefaultGoal() != null) {
-			serializer.startTag(NAMESPACE, "defaultGoal").text(buildBase.getDefaultGoal()).endTag(NAMESPACE, "defaultGoal");
+			this.write("defaultGoal", buildBase.getDefaultGoal(), serializer);
 		}
 		if ((buildBase.getResources() != null) && (buildBase.getResources().size() > 0)) {
-			serializer.startTag(NAMESPACE, "resources");
-			for (Resource o : buildBase.getResources()) {
-				writeResource(o, "resource", serializer);
-			}
-			serializer.endTag(NAMESPACE, "resources");
+			this.writeList("resources", "resource", buildBase.getResources(), this::writeResource, serializer);
 		}
 		if ((buildBase.getTestResources() != null) && (buildBase.getTestResources().size() > 0)) {
-			serializer.startTag(NAMESPACE, "testResources");
-			for (Resource o : buildBase.getTestResources()) {
-				writeResource(o, "testResource", serializer);
-			}
-			serializer.endTag(NAMESPACE, "testResources");
+			this.writeList("testResources", "testResource", buildBase.getTestResources(), this::writeResource, serializer);
 		}
 		if (buildBase.getDirectory() != null) {
-			serializer.startTag(NAMESPACE, "directory").text(buildBase.getDirectory()).endTag(NAMESPACE, "directory");
+			this.write("directory", buildBase.getDirectory(), serializer);
 		}
 		if (buildBase.getFinalName() != null) {
-			serializer.startTag(NAMESPACE, "finalName").text(buildBase.getFinalName()).endTag(NAMESPACE, "finalName");
+			this.write("finalName", buildBase.getFinalName(), serializer);
 		}
 		if ((buildBase.getFilters() != null) && (buildBase.getFilters().size() > 0)) {
-			serializer.startTag(NAMESPACE, "filters");
-			for (String filter : buildBase.getFilters()) {
-				serializer.startTag(NAMESPACE, "filter").text(filter).endTag(NAMESPACE, "filter");
-			}
-			serializer.endTag(NAMESPACE, "filters");
+			this.writeList("filters", "filter", buildBase.getFilters(), serializer);
 		}
 		if (buildBase.getPluginManagement() != null) {
 			writePluginManagement(buildBase.getPluginManagement(), serializer);
 		}
 		if ((buildBase.getPlugins() != null) && (buildBase.getPlugins().size() > 0)) {
-			serializer.startTag(NAMESPACE, "plugins");
-			for (Plugin o : buildBase.getPlugins()) {
-				writePlugin(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "plugins");
+			this.writeList("plugins", buildBase.getPlugins(), this::writePlugin, serializer);
 		}
 		serializer.endTag(NAMESPACE, "build");
 	}
 
-	private void writeCiManagement(CiManagement ciManagement, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeCiManagement(CiManagement ciManagement, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "ciManagement");
 		if (ciManagement.getSystem() != null) {
-			serializer.startTag(NAMESPACE, "system").text(ciManagement.getSystem()).endTag(NAMESPACE, "system");
+			this.write("system", ciManagement.getSystem(), serializer);
 		}
 		if (ciManagement.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(ciManagement.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", ciManagement.getUrl(), serializer);
 		}
 		if ((ciManagement.getNotifiers() != null) && (ciManagement.getNotifiers().size() > 0)) {
-			serializer.startTag(NAMESPACE, "notifiers");
-			for (Notifier o : ciManagement.getNotifiers()) {
-				writeNotifier(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "notifiers");
+			this.writeList("notifiers", ciManagement.getNotifiers(), this::writeNotifier, serializer);
 		}
 		serializer.endTag(NAMESPACE, "ciManagement");
 	}
 
-	private void writeContributor(Contributor contributor, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeContributor(Contributor contributor, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "contributor");
 		if (contributor.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(contributor.getName()).endTag(NAMESPACE, "name");
+			this.write("name", contributor.getName(), serializer);
 		}
 		if (contributor.getEmail() != null) {
-			serializer.startTag(NAMESPACE, "email").text(contributor.getEmail()).endTag(NAMESPACE, "email");
+			this.write("email", contributor.getEmail(), serializer);
 		}
 		if (contributor.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(contributor.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", contributor.getUrl(), serializer);
 		}
 		if (contributor.getOrganization() != null) {
-			serializer.startTag(NAMESPACE, "organization").text(contributor.getOrganization()).endTag(NAMESPACE, "organization");
+			this.write("organization", contributor.getOrganization(), serializer);
 		}
 		if (contributor.getOrganizationUrl() != null) {
-			serializer.startTag(NAMESPACE, "organizationUrl").text(contributor.getOrganizationUrl()).endTag(NAMESPACE, "organizationUrl");
+			this.write("organizationUrl", contributor.getOrganizationUrl(), serializer);
 		}
 		if ((contributor.getRoles() != null) && (contributor.getRoles().size() > 0)) {
-			serializer.startTag(NAMESPACE, "roles");
-			for (String role : contributor.getRoles()) {
-				serializer.startTag(NAMESPACE, "role").text(role).endTag(NAMESPACE, "role");
-			}
-			serializer.endTag(NAMESPACE, "roles");
+			this.writeList("roles", "role", contributor.getRoles(), serializer);
 		}
 		if (contributor.getTimezone() != null) {
-			serializer.startTag(NAMESPACE, "timezone").text(contributor.getTimezone()).endTag(NAMESPACE, "timezone");
+			this.write("timezone", contributor.getTimezone(), serializer);
 		}
 		if ((contributor.getProperties() != null) && (contributor.getProperties().size() > 0)) {
-			serializer.startTag(NAMESPACE, "properties");
-			for (Object o : contributor.getProperties().keySet()) {
-				String key = (String)o;
-				String value = (String)contributor.getProperties().get(key);
-				serializer.startTag(NAMESPACE, key).text(value).endTag(NAMESPACE, key);
-			}
-			serializer.endTag(NAMESPACE, "properties");
+			this.writeMap("properties", contributor.getProperties(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "contributor");
 	}
 
-	private void writeDependency(Dependency dependency, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeDependency(Dependency dependency, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "dependency");
 		if (dependency.getGroupId() != null) {
-			serializer.startTag(NAMESPACE, "groupId").text(dependency.getGroupId()).endTag(NAMESPACE, "groupId");
+			this.write("groupId", dependency.getGroupId(), serializer);
 		}
 		if (dependency.getArtifactId() != null) {
-			serializer.startTag(NAMESPACE, "artifactId").text(dependency.getArtifactId()).endTag(NAMESPACE, "artifactId");
+			this.write("artifactId", dependency.getArtifactId(), serializer);
 		}
 		if (dependency.getVersion() != null) {
-			serializer.startTag(NAMESPACE, "version").text(dependency.getVersion()).endTag(NAMESPACE, "version");
+			this.write("version", dependency.getVersion(), serializer);
 		}
 		if ((dependency.getType() != null) && !dependency.getType().equals("jar")) {
-			serializer.startTag(NAMESPACE, "type").text(dependency.getType()).endTag(NAMESPACE, "type");
+			this.write("type", dependency.getType(), serializer);
 		}
 		if (dependency.getClassifier() != null) {
-			serializer.startTag(NAMESPACE, "classifier").text(dependency.getClassifier()).endTag(NAMESPACE, "classifier");
+			this.write("classifier", dependency.getClassifier(), serializer);
 		}
-		if (dependency.getScope() != null) {
-			serializer.startTag(NAMESPACE, "scope").text(dependency.getScope()).endTag(NAMESPACE, "scope");
+		if (dependency.getScope() != null && !dependency.getScope().equals("compile")) {
+			this.write("scope", dependency.getScope(), serializer);
 		}
 		if (dependency.getSystemPath() != null) {
-			serializer.startTag(NAMESPACE, "systemPath").text(dependency.getSystemPath()).endTag(NAMESPACE, "systemPath");
+			this.write("systemPath", dependency.getSystemPath(), serializer);
 		}
 		if ((dependency.getExclusions() != null) && (dependency.getExclusions().size() > 0)) {
-			serializer.startTag(NAMESPACE, "exclusions");
-			for (Exclusion o : dependency.getExclusions()) {
-				writeExclusion(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "exclusions");
+			this.writeList("exclusions", dependency.getExclusions(), this::writeExclusion, serializer);
 		}
 		if (dependency.getOptional() != null) {
-			serializer.startTag(NAMESPACE, "optional").text(dependency.getOptional()).endTag(NAMESPACE, "optional");
+			this.write("optional", dependency.getOptional(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "dependency");
 	}
 
-	private void writeDependencyManagement(DependencyManagement dependencyManagement, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeDependencyManagement(DependencyManagement dependencyManagement, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "dependencyManagement");
 		if ((dependencyManagement.getDependencies() != null) && (dependencyManagement.getDependencies().size() > 0)) {
-			serializer.startTag(NAMESPACE, "dependencies");
-			for (Dependency o : dependencyManagement.getDependencies()) {
-				writeDependency(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "dependencies");
+			this.writeList("dependencies", dependencyManagement.getDependencies(), this::writeDependency, serializer);
 		}
 		serializer.endTag(NAMESPACE, "dependencyManagement");
 	}
 
-	private void writeDeploymentRepository(DeploymentRepository deploymentRepository, String tagName, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeDeploymentRepository(DeploymentRepository deploymentRepository, String tagName, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, tagName);
 		if (!deploymentRepository.isUniqueVersion()) {
-			serializer.startTag(NAMESPACE, "uniqueVersion").text(String.valueOf(deploymentRepository.isUniqueVersion())).endTag(NAMESPACE, "uniqueVersion");
+			this.write("uniqueVersion", String.valueOf(deploymentRepository.isUniqueVersion()), serializer);
 		}
 		if (deploymentRepository.getReleases() != null) {
 			writeRepositoryPolicy(deploymentRepository.getReleases(), "releases", serializer);
@@ -406,65 +339,53 @@ public class MavenXpp3Writer {
 			writeRepositoryPolicy(deploymentRepository.getSnapshots(), "snapshots", serializer);
 		}
 		if (deploymentRepository.getId() != null) {
-			serializer.startTag(NAMESPACE, "id").text(deploymentRepository.getId()).endTag(NAMESPACE, "id");
+			this.write("id", deploymentRepository.getId(), serializer);
 		}
 		if (deploymentRepository.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(deploymentRepository.getName()).endTag(NAMESPACE, "name");
+			this.write("name", deploymentRepository.getName(), serializer);
 		}
 		if (deploymentRepository.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(deploymentRepository.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", deploymentRepository.getUrl(), serializer);
 		}
 		if ((deploymentRepository.getLayout() != null) && !deploymentRepository.getLayout().equals("default")) {
-			serializer.startTag(NAMESPACE, "layout").text(deploymentRepository.getLayout()).endTag(NAMESPACE, "layout");
+			this.write("layout", deploymentRepository.getLayout(), serializer);
 		}
 		serializer.endTag(NAMESPACE, tagName);
 	}
 
-	private void writeDeveloper(Developer developer, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeDeveloper(Developer developer, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "developer");
 		if (developer.getId() != null) {
-			serializer.startTag(NAMESPACE, "id").text(developer.getId()).endTag(NAMESPACE, "id");
+			this.write("id", developer.getId(), serializer);
 		}
 		if (developer.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(developer.getName()).endTag(NAMESPACE, "name");
+			this.write("name", developer.getName(), serializer);
 		}
 		if (developer.getEmail() != null) {
-			serializer.startTag(NAMESPACE, "email").text(developer.getEmail()).endTag(NAMESPACE, "email");
+			this.write("email", developer.getEmail(), serializer);
 		}
 		if (developer.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(developer.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", developer.getUrl(), serializer);
 		}
 		if (developer.getOrganization() != null) {
-			serializer.startTag(NAMESPACE, "organization").text(developer.getOrganization()).endTag(NAMESPACE, "organization");
+			this.write("organization", developer.getOrganization(), serializer);
 		}
 		if (developer.getOrganizationUrl() != null) {
-			serializer.startTag(NAMESPACE, "organizationUrl").text(developer.getOrganizationUrl()).endTag(NAMESPACE, "organizationUrl");
+			this.write("organizationUrl", developer.getOrganizationUrl(), serializer);
 		}
 		if ((developer.getRoles() != null) && (developer.getRoles().size() > 0)) {
-			serializer.startTag(NAMESPACE, "roles");
-			for (String role : developer.getRoles()) {
-				serializer.startTag(NAMESPACE, "role").text(role).endTag(NAMESPACE, "role");
-			}
-			serializer.endTag(NAMESPACE, "roles");
+			this.writeList("roles", "role", developer.getRoles(), serializer);
 		}
 		if (developer.getTimezone() != null) {
-			serializer.startTag(NAMESPACE, "timezone").text(developer.getTimezone()).endTag(NAMESPACE, "timezone");
+			this.write("timezone", developer.getTimezone(), serializer);
 		}
 		if ((developer.getProperties() != null) && (developer.getProperties().size() > 0)) {
-			serializer.startTag(NAMESPACE, "properties");
-			for (Object o : developer.getProperties().keySet()) {
-				String key = (String)o;
-				String value = (String)developer.getProperties().get(key);
-				serializer.startTag(NAMESPACE, key).text(value).endTag(NAMESPACE, key);
-			}
-			serializer.endTag(NAMESPACE, "properties");
+			this.writeMap("properties", developer.getProperties(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "developer");
 	}
 
-	private void writeDistributionManagement(DistributionManagement distributionManagement, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeDistributionManagement(DistributionManagement distributionManagement, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "distributionManagement");
 		if (distributionManagement.getRepository() != null) {
 			writeDeploymentRepository(distributionManagement.getRepository(), "repository", serializer);
@@ -476,103 +397,94 @@ public class MavenXpp3Writer {
 			writeSite(distributionManagement.getSite(), serializer);
 		}
 		if (distributionManagement.getDownloadUrl() != null) {
-			serializer.startTag(NAMESPACE, "downloadUrl").text(distributionManagement.getDownloadUrl()).endTag(NAMESPACE, "downloadUrl");
+			this.write("downloadUrl", distributionManagement.getDownloadUrl(), serializer);
 		}
 		if (distributionManagement.getRelocation() != null) {
 			writeRelocation(distributionManagement.getRelocation(), serializer);
 		}
 		if (distributionManagement.getStatus() != null) {
-			serializer.startTag(NAMESPACE, "status").text(distributionManagement.getStatus()).endTag(NAMESPACE, "status");
+			this.write("status", distributionManagement.getStatus(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "distributionManagement");
 	}
 
-	private void writeExclusion(Exclusion exclusion, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeExclusion(Exclusion exclusion, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "exclusion");
 		if (exclusion.getGroupId() != null) {
-			serializer.startTag(NAMESPACE, "groupId").text(exclusion.getGroupId()).endTag(NAMESPACE, "groupId");
+			this.write("groupId", exclusion.getGroupId(), serializer);
 		}
 		if (exclusion.getArtifactId() != null) {
-			serializer.startTag(NAMESPACE, "artifactId").text(exclusion.getArtifactId()).endTag(NAMESPACE, "artifactId");
+			this.write("artifactId", exclusion.getArtifactId(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "exclusion");
 	}
 
-	private void writeExtension(Extension extension, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeExtension(Extension extension, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "extension");
 		if (extension.getGroupId() != null) {
-			serializer.startTag(NAMESPACE, "groupId").text(extension.getGroupId()).endTag(NAMESPACE, "groupId");
+			this.write("groupId", extension.getGroupId(), serializer);
 		}
 		if (extension.getArtifactId() != null) {
-			serializer.startTag(NAMESPACE, "artifactId").text(extension.getArtifactId()).endTag(NAMESPACE, "artifactId");
+			this.write("artifactId", extension.getArtifactId(), serializer);
 		}
 		if (extension.getVersion() != null) {
-			serializer.startTag(NAMESPACE, "version").text(extension.getVersion()).endTag(NAMESPACE, "version");
+			this.write("version", extension.getVersion(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "extension");
 	}
 
-	private void writeIssueManagement(IssueManagement issueManagement, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeIssueManagement(IssueManagement issueManagement, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "issueManagement");
 		if (issueManagement.getSystem() != null) {
-			serializer.startTag(NAMESPACE, "system").text(issueManagement.getSystem()).endTag(NAMESPACE, "system");
+			this.write("system", issueManagement.getSystem(), serializer);
 		}
 		if (issueManagement.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(issueManagement.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", issueManagement.getUrl(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "issueManagement");
 	}
 
-	private void writeLicense(License license, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeLicense(License license, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "license");
 		if (license.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(license.getName()).endTag(NAMESPACE, "name");
+			this.write("name", license.getName(), serializer);
 		}
 		if (license.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(license.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", license.getUrl(), serializer);
 		}
 		if (license.getDistribution() != null) {
-			serializer.startTag(NAMESPACE, "distribution").text(license.getDistribution()).endTag(NAMESPACE, "distribution");
+			this.write("distribution", license.getDistribution(), serializer);
 		}
 		if (license.getComments() != null) {
-			serializer.startTag(NAMESPACE, "comments").text(license.getComments()).endTag(NAMESPACE, "comments");
+			this.write("comments", license.getComments(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "license");
 	}
 
-	private void writeMailingList(MailingList mailingList, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeMailingList(MailingList mailingList, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "mailingList");
 		if (mailingList.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(mailingList.getName()).endTag(NAMESPACE, "name");
+			this.write("name", mailingList.getName(), serializer);
 		}
 		if (mailingList.getSubscribe() != null) {
-			serializer.startTag(NAMESPACE, "subscribe").text(mailingList.getSubscribe()).endTag(NAMESPACE, "subscribe");
+			this.write("subscribe", mailingList.getSubscribe(), serializer);
 		}
 		if (mailingList.getUnsubscribe() != null) {
-			serializer.startTag(NAMESPACE, "unsubscribe").text(mailingList.getUnsubscribe()).endTag(NAMESPACE, "unsubscribe");
+			this.write("unsubscribe", mailingList.getUnsubscribe(), serializer);
 		}
 		if (mailingList.getPost() != null) {
-			serializer.startTag(NAMESPACE, "post").text(mailingList.getPost()).endTag(NAMESPACE, "post");
+			this.write("post", mailingList.getPost(), serializer);
 		}
 		if (mailingList.getArchive() != null) {
-			serializer.startTag(NAMESPACE, "archive").text(mailingList.getArchive()).endTag(NAMESPACE, "archive");
+			this.write("archive", mailingList.getArchive(), serializer);
 		}
 		if ((mailingList.getOtherArchives() != null) && (mailingList.getOtherArchives().size() > 0)) {
-			serializer.startTag(NAMESPACE, "otherArchives");
-			for (String otherArchive : mailingList.getOtherArchives()) {
-				serializer.startTag(NAMESPACE, "otherArchive").text(otherArchive).endTag(NAMESPACE, "otherArchive");
-			}
-			serializer.endTag(NAMESPACE, "otherArchives");
+			this.writeList("otherArchives", "otherArchive", mailingList.getOtherArchives(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "mailingList");
 	}
 
-	private void writeModel(Model model, MXSerializer serializer) throws java.io.IOException {
+	private void writeModel(Model model, MXSerializer serializer) throws IOException {
 		if (this.fileComment != null) {
 			serializer.text(LINE_SEPARATOR);
 			serializer.comment(this.fileComment);
@@ -583,81 +495,61 @@ public class MavenXpp3Writer {
 		//serializer.setPrefix("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		serializer.startTag(NAMESPACE, "project");
 		//serializer.attribute("", "xsi:schemaLocation", "http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd");
-		serializer.getWriter().write(" xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+		serializer.getWriter().write(" xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
 
 		if (model.getChildProjectUrlInheritAppendPath() != null) {
 			serializer.attribute(NAMESPACE, "child.project.url.inherit.append.path", model.getChildProjectUrlInheritAppendPath());
 		}
 		if (model.getModelVersion() != null) {
-			serializer.startTag(NAMESPACE, "modelVersion").text(model.getModelVersion()).endTag(NAMESPACE, "modelVersion");
+			this.write("modelVersion", model.getModelVersion(), serializer);
 		}
 		if (model.getParent() != null) {
 			writeParent(model.getParent(), serializer);
 		}
 		if (model.getGroupId() != null) {
-			serializer.startTag(NAMESPACE, "groupId").text(model.getGroupId()).endTag(NAMESPACE, "groupId");
+			this.write("groupId", model.getGroupId(), serializer);
 		}
 		if (model.getArtifactId() != null) {
-			serializer.startTag(NAMESPACE, "artifactId").text(model.getArtifactId()).endTag(NAMESPACE, "artifactId");
+			this.write("artifactId", model.getArtifactId(), serializer);
 		}
 		if (model.getVersion() != null) {
-			serializer.startTag(NAMESPACE, "version").text(model.getVersion()).endTag(NAMESPACE, "version");
+			this.write("version", model.getVersion(), serializer);
 		}
 		if ((model.getPackaging() != null) && !model.getPackaging().equals("jar")) {
-			serializer.startTag(NAMESPACE, "packaging").text(model.getPackaging()).endTag(NAMESPACE, "packaging");
+			this.write("packaging", model.getPackaging(), serializer);
 		}
 		if (model.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(model.getName()).endTag(NAMESPACE, "name");
+			this.write("name", model.getName(), serializer);
 		}
 		if (model.getDescription() != null) {
-			serializer.startTag(NAMESPACE, "description").text(model.getDescription()).endTag(NAMESPACE, "description");
+			this.write("description", model.getDescription(), serializer);
 		}
 		if (model.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(model.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", model.getUrl(), serializer);
 		}
 		if (model.getInceptionYear() != null) {
-			serializer.startTag(NAMESPACE, "inceptionYear").text(model.getInceptionYear()).endTag(NAMESPACE, "inceptionYear");
+			this.write("inceptionYear", model.getInceptionYear(), serializer);
 		}
 		if (model.getOrganization() != null) {
 			writeOrganization(model.getOrganization(), serializer);
 		}
 		if ((model.getLicenses() != null) && (model.getLicenses().size() > 0)) {
-			serializer.startTag(NAMESPACE, "licenses");
-			for (License o : model.getLicenses()) {
-				writeLicense(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "licenses");
+			this.writeList("licenses", model.getLicenses(), this::writeLicense, serializer);
 		}
 		if ((model.getDevelopers() != null) && (model.getDevelopers().size() > 0)) {
-			serializer.startTag(NAMESPACE, "developers");
-			for (Developer o : model.getDevelopers()) {
-				writeDeveloper(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "developers");
+			this.writeList("developers", model.getDevelopers(), this::writeDeveloper, serializer);
 		}
 		if ((model.getContributors() != null) && (model.getContributors().size() > 0)) {
-			serializer.startTag(NAMESPACE, "contributors");
-			for (Contributor o : model.getContributors()) {
-				writeContributor(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "contributors");
+			this.writeList("contributors", model.getContributors(), this::writeContributor, serializer);
 		}
 		if ((model.getMailingLists() != null) && (model.getMailingLists().size() > 0)) {
-			serializer.startTag(NAMESPACE, "mailingLists");
-			for (MailingList o : model.getMailingLists()) {
-				writeMailingList(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "mailingLists");
+			this.writeList("mailingLists", model.getMailingLists(), this::writeMailingList, serializer);
 		}
 		if (model.getPrerequisites() != null) {
 			writePrerequisites(model.getPrerequisites(), serializer);
 		}
 		if ((model.getModules() != null) && (model.getModules().size() > 0)) {
-			serializer.startTag(NAMESPACE, "modules");
-			for (String module : model.getModules()) {
-				serializer.startTag(NAMESPACE, "module").text(module).endTag(NAMESPACE, "module");
-			}
-			serializer.endTag(NAMESPACE, "modules");
+			this.writeList("modules", "module", model.getModules(), serializer);
 		}
 		if (model.getScm() != null) {
 			writeScm(model.getScm(), serializer);
@@ -672,37 +564,19 @@ public class MavenXpp3Writer {
 			writeDistributionManagement(model.getDistributionManagement(), serializer);
 		}
 		if ((model.getProperties() != null) && (model.getProperties().size() > 0)) {
-			serializer.startTag(NAMESPACE, "properties");
-			for (Object o : model.getProperties().keySet()) {
-				String key = (String)o;
-				String value = (String)model.getProperties().get(key);
-				serializer.startTag(NAMESPACE, key).text(value).endTag(NAMESPACE, key);
-			}
-			serializer.endTag(NAMESPACE, "properties");
+			this.writeMap("properties", model.getProperties(), serializer);
 		}
 		if (model.getDependencyManagement() != null) {
 			writeDependencyManagement(model.getDependencyManagement(), serializer);
 		}
 		if ((model.getDependencies() != null) && (model.getDependencies().size() > 0)) {
-			serializer.startTag(NAMESPACE, "dependencies");
-			for (Dependency o : model.getDependencies()) {
-				writeDependency(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "dependencies");
+			this.writeList("dependencies", model.getDependencies(), this::writeDependency, serializer);
 		}
 		if ((model.getRepositories() != null) && (model.getRepositories().size() > 0)) {
-			serializer.startTag(NAMESPACE, "repositories");
-			for (Repository o : model.getRepositories()) {
-				writeRepository(o, "repository", serializer);
-			}
-			serializer.endTag(NAMESPACE, "repositories");
+			this.writeList("repositories", "repository", model.getRepositories(), this::writeRepository, serializer);
 		}
 		if ((model.getPluginRepositories() != null) && (model.getPluginRepositories().size() > 0)) {
-			serializer.startTag(NAMESPACE, "pluginRepositories");
-			for (Repository o : model.getPluginRepositories()) {
-				writeRepository(o, "pluginRepository", serializer);
-			}
-			serializer.endTag(NAMESPACE, "pluginRepositories");
+			this.writeList("pluginRepositories", "pluginRepository", model.getPluginRepositories(), this::writeRepository, serializer);
 		}
 		if (model.getBuild() != null) {
 			writeBuild(model.getBuild(), serializer);
@@ -714,112 +588,90 @@ public class MavenXpp3Writer {
 			writeReporting(model.getReporting(), serializer);
 		}
 		if ((model.getProfiles() != null) && (model.getProfiles().size() > 0)) {
-			serializer.startTag(NAMESPACE, "profiles");
-			for (Profile o : model.getProfiles()) {
-				writeProfile(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "profiles");
+			this.writeList("profiles", model.getProfiles(), this::writeProfile, serializer);
 		}
 		serializer.endTag(NAMESPACE, "project");
 	}
 
-	private void writeNotifier(Notifier notifier, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeNotifier(Notifier notifier, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "notifier");
 		if ((notifier.getType() != null) && !notifier.getType().equals("mail")) {
-			serializer.startTag(NAMESPACE, "type").text(notifier.getType()).endTag(NAMESPACE, "type");
+			this.write("type", notifier.getType(), serializer);
 		}
 		if (!notifier.isSendOnError()) {
-			serializer.startTag(NAMESPACE, "sendOnError").text(String.valueOf(notifier.isSendOnError())).endTag(NAMESPACE, "sendOnError");
+			this.write("sendOnError", String.valueOf(notifier.isSendOnError()), serializer);
 		}
 		if (!notifier.isSendOnFailure()) {
-			serializer.startTag(NAMESPACE, "sendOnFailure").text(String.valueOf(notifier.isSendOnFailure())).endTag(NAMESPACE, "sendOnFailure");
+			this.write("sendOnFailure", String.valueOf(notifier.isSendOnFailure()), serializer);
 		}
 		if (!notifier.isSendOnSuccess()) {
-			serializer.startTag(NAMESPACE, "sendOnSuccess").text(String.valueOf(notifier.isSendOnSuccess())).endTag(NAMESPACE, "sendOnSuccess");
+			this.write("sendOnSuccess", String.valueOf(notifier.isSendOnSuccess()), serializer);
 		}
 		if (!notifier.isSendOnWarning()) {
-			serializer.startTag(NAMESPACE, "sendOnWarning").text(String.valueOf(notifier.isSendOnWarning())).endTag(NAMESPACE, "sendOnWarning");
+			this.write("sendOnWarning", String.valueOf(notifier.isSendOnWarning()), serializer);
 		}
 		if (notifier.getAddress() != null) {
-			serializer.startTag(NAMESPACE, "address").text(notifier.getAddress()).endTag(NAMESPACE, "address");
+			this.write("address", notifier.getAddress(), serializer);
 		}
 		if ((notifier.getConfiguration() != null) && (notifier.getConfiguration().size() > 0)) {
-			serializer.startTag(NAMESPACE, "configuration");
-			for (Object o : notifier.getConfiguration().keySet()) {
-				String key = (String)o;
-				String value = (String)notifier.getConfiguration().get(key);
-				serializer.startTag(NAMESPACE, key).text(value).endTag(NAMESPACE, key);
-			}
-			serializer.endTag(NAMESPACE, "configuration");
+			this.writeMap("configuration", notifier.getConfiguration(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "notifier");
 	}
 
-	private void writeOrganization(Organization organization, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeOrganization(Organization organization, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "organization");
 		if (organization.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(organization.getName()).endTag(NAMESPACE, "name");
+			this.write("name", organization.getName(), serializer);
 		}
 		if (organization.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(organization.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", organization.getUrl(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "organization");
 	}
 
-	private void writeParent(Parent parent, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeParent(Parent parent, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "parent");
 		if (parent.getGroupId() != null) {
-			serializer.startTag(NAMESPACE, "groupId").text(parent.getGroupId()).endTag(NAMESPACE, "groupId");
+			this.write("groupId", parent.getGroupId(), serializer);
 		}
 		if (parent.getArtifactId() != null) {
-			serializer.startTag(NAMESPACE, "artifactId").text(parent.getArtifactId()).endTag(NAMESPACE, "artifactId");
+			this.write("artifactId", parent.getArtifactId(), serializer);
 		}
 		if (parent.getVersion() != null) {
-			serializer.startTag(NAMESPACE, "version").text(parent.getVersion()).endTag(NAMESPACE, "version");
+			this.write("version", parent.getVersion(), serializer);
 		}
-		if ((parent.getRelativePath() != null) && !parent.getRelativePath().equals("../pom.xml")) {
-			serializer.startTag(NAMESPACE, "relativePath").text(parent.getRelativePath()).endTag(NAMESPACE, "relativePath");
+		if (parent.getRelativePath() != null && parent.getRelativePath().length() > 0 && !parent.getRelativePath().equals("../pom.xml")) {
+			this.write("relativePath", parent.getRelativePath(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "parent");
 	}
 
-	private void writePlugin(Plugin plugin, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writePlugin(Plugin plugin, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "plugin");
 		if ((plugin.getGroupId() != null) && !plugin.getGroupId().equals("org.apache.maven.plugins")) {
-			serializer.startTag(NAMESPACE, "groupId").text(plugin.getGroupId()).endTag(NAMESPACE, "groupId");
+			this.write("groupId", plugin.getGroupId(), serializer);
 		}
 		if (plugin.getArtifactId() != null) {
-			serializer.startTag(NAMESPACE, "artifactId").text(plugin.getArtifactId()).endTag(NAMESPACE, "artifactId");
+			this.write("artifactId", plugin.getArtifactId(), serializer);
 		}
 		if (plugin.getVersion() != null) {
-			serializer.startTag(NAMESPACE, "version").text(plugin.getVersion()).endTag(NAMESPACE, "version");
+			this.write("version", plugin.getVersion(), serializer);
 		}
 		if (plugin.getExtensions() != null) {
-			serializer.startTag(NAMESPACE, "extensions").text(plugin.getExtensions()).endTag(NAMESPACE, "extensions");
+			this.write("extensions", plugin.getExtensions(), serializer);
 		}
 		if ((plugin.getExecutions() != null) && (plugin.getExecutions().size() > 0)) {
-			serializer.startTag(NAMESPACE, "executions");
-			for (PluginExecution o : plugin.getExecutions()) {
-				writePluginExecution(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "executions");
+			this.writeList("executions", plugin.getExecutions(), this::writePluginExecution, serializer);
 		}
 		if ((plugin.getDependencies() != null) && (plugin.getDependencies().size() > 0)) {
-			serializer.startTag(NAMESPACE, "dependencies");
-			for (Dependency o : plugin.getDependencies()) {
-				writeDependency(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "dependencies");
+			this.writeList("dependencies", plugin.getDependencies(), this::writeDependency, serializer);
 		}
 		if (plugin.getGoals() != null) {
 			((Xpp3Dom)plugin.getGoals()).writeToSerializer(NAMESPACE, serializer);
 		}
-		if (plugin.getInherited() != null) {
-			serializer.startTag(NAMESPACE, "inherited").text(plugin.getInherited()).endTag(NAMESPACE, "inherited");
+		if (!plugin.isInherited()) {
+			this.write("inherited", plugin.getInherited(), serializer);
 		}
 		if (plugin.getConfiguration() != null) {
 			((Xpp3Dom)plugin.getConfiguration()).writeToSerializer(NAMESPACE, serializer);
@@ -827,24 +679,19 @@ public class MavenXpp3Writer {
 		serializer.endTag(NAMESPACE, "plugin");
 	}
 
-	private void writePluginExecution(PluginExecution pluginExecution, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writePluginExecution(PluginExecution pluginExecution, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "execution");
 		if ((pluginExecution.getId() != null) && !pluginExecution.getId().equals("default")) {
-			serializer.startTag(NAMESPACE, "id").text(pluginExecution.getId()).endTag(NAMESPACE, "id");
+			this.write("id", pluginExecution.getId(), serializer);
 		}
 		if (pluginExecution.getPhase() != null) {
-			serializer.startTag(NAMESPACE, "phase").text(pluginExecution.getPhase()).endTag(NAMESPACE, "phase");
+			this.write("phase", pluginExecution.getPhase(), serializer);
 		}
 		if ((pluginExecution.getGoals() != null) && (pluginExecution.getGoals().size() > 0)) {
-			serializer.startTag(NAMESPACE, "goals");
-			for (String goal : pluginExecution.getGoals()) {
-				serializer.startTag(NAMESPACE, "goal").text(goal).endTag(NAMESPACE, "goal");
-			}
-			serializer.endTag(NAMESPACE, "goals");
+			this.writeList("goals", "goal", pluginExecution.getGoals(), serializer);
 		}
-		if (pluginExecution.getInherited() != null) {
-			serializer.startTag(NAMESPACE, "inherited").text(pluginExecution.getInherited()).endTag(NAMESPACE, "inherited");
+		if (!pluginExecution.isInherited()) {
+			this.write("inherited", pluginExecution.getInherited(), serializer);
 		}
 		if (pluginExecution.getConfiguration() != null) {
 			((Xpp3Dom)pluginExecution.getConfiguration()).writeToSerializer(NAMESPACE, serializer);
@@ -852,131 +699,96 @@ public class MavenXpp3Writer {
 		serializer.endTag(NAMESPACE, "execution");
 	}
 
-	private void writePluginManagement(PluginManagement pluginManagement, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writePluginManagement(PluginManagement pluginManagement, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "pluginManagement");
 		if ((pluginManagement.getPlugins() != null) && (pluginManagement.getPlugins().size() > 0)) {
-			serializer.startTag(NAMESPACE, "plugins");
-			for (Plugin o : pluginManagement.getPlugins()) {
-				writePlugin(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "plugins");
+			this.writeList("plugins", pluginManagement.getPlugins(), this::writePlugin, serializer);
 		}
 		serializer.endTag(NAMESPACE, "pluginManagement");
 	}
 
-	private void writePrerequisites(Prerequisites prerequisites, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writePrerequisites(Prerequisites prerequisites, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "prerequisites");
 		if ((prerequisites.getMaven() != null) && !prerequisites.getMaven().equals("2.0")) {
-			serializer.startTag(NAMESPACE, "maven").text(prerequisites.getMaven()).endTag(NAMESPACE, "maven");
+			this.write("maven", prerequisites.getMaven(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "prerequisites");
 	}
 
-	private void writeProfile(Profile profile, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeProfile(Profile profile, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "profile");
 		if ((profile.getId() != null) && !profile.getId().equals("default")) {
-			serializer.startTag(NAMESPACE, "id").text(profile.getId()).endTag(NAMESPACE, "id");
+			this.write("id", profile.getId(), serializer);
 		}
 		if (profile.getActivation() != null) {
-			writeActivation((Activation)profile.getActivation(), serializer);
+			writeActivation(profile.getActivation(), serializer);
 		}
 		if (profile.getBuild() != null) {
-			writeBuildBase((BuildBase)profile.getBuild(), serializer);
+			writeBuildBase(profile.getBuild(), serializer);
 		}
 		if ((profile.getModules() != null) && (profile.getModules().size() > 0)) {
-			serializer.startTag(NAMESPACE, "modules");
-			for (String module : profile.getModules()) {
-				serializer.startTag(NAMESPACE, "module").text(module).endTag(NAMESPACE, "module");
-			}
-			serializer.endTag(NAMESPACE, "modules");
+			this.writeList("modules", "module", profile.getModules(), serializer);
 		}
 		if (profile.getDistributionManagement() != null) {
-			writeDistributionManagement((DistributionManagement)profile.getDistributionManagement(), serializer);
+			writeDistributionManagement(profile.getDistributionManagement(), serializer);
 		}
 		if ((profile.getProperties() != null) && (profile.getProperties().size() > 0)) {
-			serializer.startTag(NAMESPACE, "properties");
-			for (Object o : profile.getProperties().keySet()) {
-				String key = (String)o;
-				String value = (String)profile.getProperties().get(key);
-				serializer.startTag(NAMESPACE, key).text(value).endTag(NAMESPACE, key);
-			}
-			serializer.endTag(NAMESPACE, "properties");
+			this.writeMap("properties", profile.getProperties(), serializer);
 		}
 		if (profile.getDependencyManagement() != null) {
-			writeDependencyManagement((DependencyManagement)profile.getDependencyManagement(), serializer);
+			writeDependencyManagement(profile.getDependencyManagement(), serializer);
 		}
 		if ((profile.getDependencies() != null) && (profile.getDependencies().size() > 0)) {
-			serializer.startTag(NAMESPACE, "dependencies");
-			for (Dependency o : profile.getDependencies()) {
-				writeDependency(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "dependencies");
+			this.writeList("dependencies", profile.getDependencies(), this::writeDependency, serializer);
 		}
 		if ((profile.getRepositories() != null) && (profile.getRepositories().size() > 0)) {
-			serializer.startTag(NAMESPACE, "repositories");
-			for (Repository o : profile.getRepositories()) {
-				writeRepository(o, "repository", serializer);
-			}
-			serializer.endTag(NAMESPACE, "repositories");
+			this.writeList("repositories", "repository", profile.getRepositories(), this::writeRepository, serializer);
 		}
 		if ((profile.getPluginRepositories() != null) && (profile.getPluginRepositories().size() > 0)) {
-			serializer.startTag(NAMESPACE, "pluginRepositories");
-			for (Repository o : profile.getPluginRepositories()) {
-				writeRepository(o, "pluginRepository", serializer);
-			}
-			serializer.endTag(NAMESPACE, "pluginRepositories");
+			this.writeList("pluginRepositories", "pluginRepository", profile.getPluginRepositories(), this::writeRepository, serializer);
 		}
 		if (profile.getReports() != null) {
 			((Xpp3Dom)profile.getReports()).writeToSerializer(NAMESPACE, serializer);
 		}
 		if (profile.getReporting() != null) {
-			writeReporting((Reporting)profile.getReporting(), serializer);
+			writeReporting(profile.getReporting(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "profile");
 	}
 
-	private void writeRelocation(Relocation relocation, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeRelocation(Relocation relocation, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "relocation");
 		if (relocation.getGroupId() != null) {
-			serializer.startTag(NAMESPACE, "groupId").text(relocation.getGroupId()).endTag(NAMESPACE, "groupId");
+			this.write("groupId", relocation.getGroupId(), serializer);
 		}
 		if (relocation.getArtifactId() != null) {
-			serializer.startTag(NAMESPACE, "artifactId").text(relocation.getArtifactId()).endTag(NAMESPACE, "artifactId");
+			this.write("artifactId", relocation.getArtifactId(), serializer);
 		}
 		if (relocation.getVersion() != null) {
-			serializer.startTag(NAMESPACE, "version").text(relocation.getVersion()).endTag(NAMESPACE, "version");
+			this.write("version", relocation.getVersion(), serializer);
 		}
 		if (relocation.getMessage() != null) {
-			serializer.startTag(NAMESPACE, "message").text(relocation.getMessage()).endTag(NAMESPACE, "message");
+			this.write("message", relocation.getMessage(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "relocation");
 	}
 
-	private void writeReportPlugin(ReportPlugin reportPlugin, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeReportPlugin(ReportPlugin reportPlugin, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "plugin");
 		if ((reportPlugin.getGroupId() != null) && !reportPlugin.getGroupId().equals("org.apache.maven.plugins")) {
-			serializer.startTag(NAMESPACE, "groupId").text(reportPlugin.getGroupId()).endTag(NAMESPACE, "groupId");
+			this.write("groupId", reportPlugin.getGroupId(), serializer);
 		}
 		if (reportPlugin.getArtifactId() != null) {
-			serializer.startTag(NAMESPACE, "artifactId").text(reportPlugin.getArtifactId()).endTag(NAMESPACE, "artifactId");
+			this.write("artifactId", reportPlugin.getArtifactId(), serializer);
 		}
 		if (reportPlugin.getVersion() != null) {
-			serializer.startTag(NAMESPACE, "version").text(reportPlugin.getVersion()).endTag(NAMESPACE, "version");
+			this.write("version", reportPlugin.getVersion(), serializer);
 		}
 		if ((reportPlugin.getReportSets() != null) && (reportPlugin.getReportSets().size() > 0)) {
-			serializer.startTag(NAMESPACE, "reportSets");
-			for (ReportSet o : reportPlugin.getReportSets()) {
-				writeReportSet(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "reportSets");
+			this.writeList("reportSets", reportPlugin.getReportSets(), this::writeReportSet, serializer);
 		}
-		if (reportPlugin.getInherited() != null) {
-			serializer.startTag(NAMESPACE, "inherited").text(reportPlugin.getInherited()).endTag(NAMESPACE, "inherited");
+		if (!reportPlugin.isInherited()) {
+			this.write("inherited", reportPlugin.getInherited(), serializer);
 		}
 		if (reportPlugin.getConfiguration() != null) {
 			((Xpp3Dom)reportPlugin.getConfiguration()).writeToSerializer(NAMESPACE, serializer);
@@ -984,21 +796,16 @@ public class MavenXpp3Writer {
 		serializer.endTag(NAMESPACE, "plugin");
 	}
 
-	private void writeReportSet(ReportSet reportSet, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeReportSet(ReportSet reportSet, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "reportSet");
 		if ((reportSet.getId() != null) && !reportSet.getId().equals("default")) {
-			serializer.startTag(NAMESPACE, "id").text(reportSet.getId()).endTag(NAMESPACE, "id");
+			this.write("id", reportSet.getId(), serializer);
 		}
 		if ((reportSet.getReports() != null) && (reportSet.getReports().size() > 0)) {
-			serializer.startTag(NAMESPACE, "reports");
-			for (String report : reportSet.getReports()) {
-				serializer.startTag(NAMESPACE, "report").text(report).endTag(NAMESPACE, "report");
-			}
-			serializer.endTag(NAMESPACE, "reports");
+			this.writeList("reports", "report", reportSet.getReports(), serializer);
 		}
-		if (reportSet.getInherited() != null) {
-			serializer.startTag(NAMESPACE, "inherited").text(reportSet.getInherited()).endTag(NAMESPACE, "inherited");
+		if (!reportSet.isInherited()) {
+			this.write("inherited", reportSet.getInherited(), serializer);
 		}
 		if (reportSet.getConfiguration() != null) {
 			((Xpp3Dom)reportSet.getConfiguration()).writeToSerializer(NAMESPACE, serializer);
@@ -1006,27 +813,21 @@ public class MavenXpp3Writer {
 		serializer.endTag(NAMESPACE, "reportSet");
 	}
 
-	private void writeReporting(Reporting reporting, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeReporting(Reporting reporting, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "reporting");
 		if (reporting.getExcludeDefaults() != null) {
-			serializer.startTag(NAMESPACE, "excludeDefaults").text(reporting.getExcludeDefaults()).endTag(NAMESPACE, "excludeDefaults");
+			this.write("excludeDefaults", reporting.getExcludeDefaults(), serializer);
 		}
 		if (reporting.getOutputDirectory() != null) {
-			serializer.startTag(NAMESPACE, "outputDirectory").text(reporting.getOutputDirectory()).endTag(NAMESPACE, "outputDirectory");
+			this.write("outputDirectory", reporting.getOutputDirectory(), serializer);
 		}
 		if ((reporting.getPlugins() != null) && (reporting.getPlugins().size() > 0)) {
-			serializer.startTag(NAMESPACE, "plugins");
-			for (ReportPlugin o : reporting.getPlugins()) {
-				writeReportPlugin(o, serializer);
-			}
-			serializer.endTag(NAMESPACE, "plugins");
+			this.writeList("plugins", reporting.getPlugins(), this::writeReportPlugin, serializer);
 		}
 		serializer.endTag(NAMESPACE, "reporting");
 	}
 
-	private void writeRepository(Repository repository, String tagName, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeRepository(Repository repository, String tagName, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, tagName);
 		if (repository.getReleases() != null) {
 			writeRepositoryPolicy(repository.getReleases(), "releases", serializer);
@@ -1035,66 +836,55 @@ public class MavenXpp3Writer {
 			writeRepositoryPolicy(repository.getSnapshots(), "snapshots", serializer);
 		}
 		if (repository.getId() != null) {
-			serializer.startTag(NAMESPACE, "id").text(repository.getId()).endTag(NAMESPACE, "id");
+			this.write("id", repository.getId(), serializer);
 		}
 		if (repository.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(repository.getName()).endTag(NAMESPACE, "name");
+			this.write("name", repository.getName(), serializer);
 		}
 		if (repository.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(repository.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", repository.getUrl(), serializer);
 		}
 		if ((repository.getLayout() != null) && !repository.getLayout().equals("default")) {
-			serializer.startTag(NAMESPACE, "layout").text(repository.getLayout()).endTag(NAMESPACE, "layout");
+			this.write("layout", repository.getLayout(), serializer);
 		}
 		serializer.endTag(NAMESPACE, tagName);
 	}
 
-	private void writeRepositoryPolicy(RepositoryPolicy repositoryPolicy, String tagName, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeRepositoryPolicy(RepositoryPolicy repositoryPolicy, String tagName, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, tagName);
 		if (repositoryPolicy.getEnabled() != null) {
-			serializer.startTag(NAMESPACE, "enabled").text(repositoryPolicy.getEnabled()).endTag(NAMESPACE, "enabled");
+			this.write("enabled", repositoryPolicy.getEnabled(), serializer);
 		}
 		if (repositoryPolicy.getUpdatePolicy() != null) {
-			serializer.startTag(NAMESPACE, "updatePolicy").text(repositoryPolicy.getUpdatePolicy()).endTag(NAMESPACE, "updatePolicy");
+			this.write("updatePolicy", repositoryPolicy.getUpdatePolicy(), serializer);
 		}
 		if (repositoryPolicy.getChecksumPolicy() != null) {
-			serializer.startTag(NAMESPACE, "checksumPolicy").text(repositoryPolicy.getChecksumPolicy()).endTag(NAMESPACE, "checksumPolicy");
+			this.write("checksumPolicy", repositoryPolicy.getChecksumPolicy(), serializer);
 		}
 		serializer.endTag(NAMESPACE, tagName);
 	}
 
-	private void writeResource(Resource resource, String tagName, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeResource(Resource resource, String tagName, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, tagName);
 		if (resource.getTargetPath() != null) {
-			serializer.startTag(NAMESPACE, "targetPath").text(resource.getTargetPath()).endTag(NAMESPACE, "targetPath");
+			this.write("targetPath", resource.getTargetPath(), serializer);
 		}
 		if (resource.getFiltering() != null) {
-			serializer.startTag(NAMESPACE, "filtering").text(resource.getFiltering()).endTag(NAMESPACE, "filtering");
+			this.write("filtering", resource.getFiltering(), serializer);
 		}
 		if (resource.getDirectory() != null) {
-			serializer.startTag(NAMESPACE, "directory").text(resource.getDirectory()).endTag(NAMESPACE, "directory");
+			this.write("directory", resource.getDirectory(), serializer);
 		}
 		if ((resource.getIncludes() != null) && (resource.getIncludes().size() > 0)) {
-			serializer.startTag(NAMESPACE, "includes");
-			for (String include : resource.getIncludes()) {
-				serializer.startTag(NAMESPACE, "include").text(include).endTag(NAMESPACE, "include");
-			}
-			serializer.endTag(NAMESPACE, "includes");
+			this.writeList("includes", "include", resource.getIncludes(), serializer);
 		}
 		if ((resource.getExcludes() != null) && (resource.getExcludes().size() > 0)) {
-			serializer.startTag(NAMESPACE, "excludes");
-			for (String exclude : resource.getExcludes()) {
-				serializer.startTag(NAMESPACE, "exclude").text(exclude).endTag(NAMESPACE, "exclude");
-			}
-			serializer.endTag(NAMESPACE, "excludes");
+			this.writeList("excludes", "exclude", resource.getExcludes(), serializer);
 		}
 		serializer.endTag(NAMESPACE, tagName);
 	}
 
-	private void writeScm(Scm scm, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeScm(Scm scm, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "scm");
 		if (scm.getChildScmConnectionInheritAppendPath() != null) {
 			serializer.attribute(NAMESPACE, "child.scm.connection.inherit.append.path", scm.getChildScmConnectionInheritAppendPath());
@@ -1106,35 +896,96 @@ public class MavenXpp3Writer {
 			serializer.attribute(NAMESPACE, "child.scm.url.inherit.append.path", scm.getChildScmUrlInheritAppendPath());
 		}
 		if (scm.getConnection() != null) {
-			serializer.startTag(NAMESPACE, "connection").text(scm.getConnection()).endTag(NAMESPACE, "connection");
+			this.write("connection", scm.getConnection(), serializer);
 		}
 		if (scm.getDeveloperConnection() != null) {
-			serializer.startTag(NAMESPACE, "developerConnection").text(scm.getDeveloperConnection()).endTag(NAMESPACE, "developerConnection");
+			this.write("developerConnection", scm.getDeveloperConnection(), serializer);
 		}
 		if ((scm.getTag() != null) && !scm.getTag().equals("HEAD")) {
-			serializer.startTag(NAMESPACE, "tag").text(scm.getTag()).endTag(NAMESPACE, "tag");
+			this.write("tag", scm.getTag(), serializer);
 		}
 		if (scm.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(scm.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", scm.getUrl(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "scm");
 	}
 
-	private void writeSite(Site site, MXSerializer serializer)
-			throws java.io.IOException {
+	private void writeSite(Site site, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "site");
 		if (site.getChildSiteUrlInheritAppendPath() != null) {
 			serializer.attribute(NAMESPACE, "child.site.url.inherit.append.path", site.getChildSiteUrlInheritAppendPath());
 		}
 		if (site.getId() != null) {
-			serializer.startTag(NAMESPACE, "id").text(site.getId()).endTag(NAMESPACE, "id");
+			this.write("id", site.getId(), serializer);
 		}
 		if (site.getName() != null) {
-			serializer.startTag(NAMESPACE, "name").text(site.getName()).endTag(NAMESPACE, "name");
+			this.write("name", site.getName(), serializer);
 		}
 		if (site.getUrl() != null) {
-			serializer.startTag(NAMESPACE, "url").text(site.getUrl()).endTag(NAMESPACE, "url");
+			this.write("url", site.getUrl(), serializer);
 		}
 		serializer.endTag(NAMESPACE, "site");
+	}
+
+	private void write(Map.Entry<Object, Object> entry, MXSerializer serializer) throws IOException {
+		this.write(entry.getKey(), entry.getValue(), serializer);
+	}
+
+	private void write(Object tagNameObj, Object valueObj, MXSerializer serializer) throws IOException {
+		String tagName = (String)tagNameObj;
+		String value = (String)valueObj;
+		this.write(tagName, value, serializer);
+	}
+
+	private void write(String tagName, String value, MXSerializer serializer) throws IOException {
+		if (value != null && value.length() > 0) {
+			serializer.startTag(NAMESPACE, tagName).text(value).endTag(NAMESPACE, tagName);
+		} else {
+			serializer.startTag(NAMESPACE, tagName).endTag(NAMESPACE, tagName);
+		}
+	}
+
+	private void writeList(String parentTagName, String tagName, List<String> list, MXSerializer serializer) throws IOException {
+		this.writeList(parentTagName, list, (v, s) -> this.write(tagName, v, serializer), serializer);
+	}
+
+	private <T> void writeList(String tagName, List<T> list, Consumer<T> consumer, MXSerializer serializer) throws IOException {
+		serializer.startTag(NAMESPACE, tagName);
+		for (T item : list) {
+			consumer.accept(item, serializer);
+		}
+		serializer.endTag(NAMESPACE, tagName);
+	}
+
+	private <T> void writeList(String parentTagName, String tagName, List<T> list, Consumer2<T> consumer, MXSerializer serializer) throws IOException {
+		serializer.startTag(NAMESPACE, parentTagName);
+		for (T item : list) {
+			consumer.accept(item, tagName, serializer);
+		}
+		serializer.endTag(NAMESPACE, parentTagName);
+	}
+
+	private void writeMap(Map<Object, Object> map, MXSerializer serializer) throws IOException {
+		for (Map.Entry<Object, Object> entry : map.entrySet()) {
+			this.write(entry, serializer);
+		}
+	}
+
+	private void writeMap(String tagName, Map<Object, Object> map, MXSerializer serializer) throws IOException {
+		serializer.startTag(NAMESPACE, tagName);
+		this.writeMap(map, serializer);
+		serializer.endTag(NAMESPACE, tagName);
+	}
+
+
+	@FunctionalInterface
+	private interface Consumer<T> {
+		void accept(T t, MXSerializer serializer) throws IOException;
+	}
+
+
+	@FunctionalInterface
+	private interface Consumer2<T> {
+		void accept(T t, String tagName, MXSerializer serializer) throws IOException;
 	}
 }

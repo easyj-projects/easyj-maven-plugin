@@ -38,7 +38,8 @@ public class MavenXpp3WriterTest {
 		Model model = new Model();
 
 		Properties properties = new Properties();
-		properties.put("aaa", "bbb");
+		properties.put("aaa", "111");
+		properties.put("bbb", "");
 		model.setProperties(properties);
 
 		MavenXpp3Writer pomWriter = new MavenXpp3Writer();
@@ -48,7 +49,10 @@ public class MavenXpp3WriterTest {
 		StringWriter stringWriter = new StringWriter(POM_WRITER_SIZE);
 		pomWriter.write(stringWriter, model);
 		StringBuffer buffer = stringWriter.getBuffer();
-		System.out.println(buffer.toString().replaceAll("(\r?\n){2,}", "\r\n"));
+
+		String pomStr = buffer.toString().replaceAll("(\r?\n){2,}", "\r\n").replace(" />", "/>");
+
+		System.out.println(pomStr);
 	}
 
 	@Test
