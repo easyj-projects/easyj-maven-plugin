@@ -364,6 +364,18 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 	//endregion ##
 
 
+	//region -------------------- Modules --------------------
+
+	public void removeModules() {
+		if (ObjectUtils.isNotEmpty(this.model.getModules())) {
+			this.log.info("Remove Modules.");
+			this.originalModel.setModules(null);
+		}
+	}
+
+	//endregion ##
+
+
 	//region -------------------- Organization、Url、Licenses、Developers、Scm、IssueManagement --------------------
 
 	public void copyProjectInfoFromParentForOpenSourceProject() {
