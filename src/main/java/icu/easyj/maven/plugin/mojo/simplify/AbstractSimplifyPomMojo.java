@@ -85,6 +85,9 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 
 	private void writeStringToFile(String data, File file, String encoding)
 			throws MojoExecutionException {
+		// 不同的maven版本，换行数量有些微不同，将多个连续的换行替换成单个换行
+		data = data.replaceAll("(\r?\n){2,}", "\r\n");
+
 		byte[] binaryData;
 		try {
 			binaryData = data.getBytes(encoding);

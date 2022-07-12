@@ -48,7 +48,7 @@ public class MavenXpp3WriterTest {
 		StringWriter stringWriter = new StringWriter(POM_WRITER_SIZE);
 		pomWriter.write(stringWriter, model);
 		StringBuffer buffer = stringWriter.getBuffer();
-		System.out.println(buffer);
+		System.out.println(buffer.toString().replaceAll("(\r?\n){2,}", "\r\n"));
 	}
 
 	@Test
