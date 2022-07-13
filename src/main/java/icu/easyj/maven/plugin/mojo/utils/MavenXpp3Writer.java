@@ -330,15 +330,6 @@ public class MavenXpp3Writer {
 
 	private void writeDeploymentRepository(DeploymentRepository deploymentRepository, String tagName, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, tagName);
-		if (!deploymentRepository.isUniqueVersion()) {
-			this.write("uniqueVersion", String.valueOf(deploymentRepository.isUniqueVersion()), serializer);
-		}
-		if (deploymentRepository.getReleases() != null) {
-			writeRepositoryPolicy(deploymentRepository.getReleases(), "releases", serializer);
-		}
-		if (deploymentRepository.getSnapshots() != null) {
-			writeRepositoryPolicy(deploymentRepository.getSnapshots(), "snapshots", serializer);
-		}
 		if (deploymentRepository.getId() != null) {
 			this.write("id", deploymentRepository.getId(), serializer);
 		}
@@ -350,6 +341,15 @@ public class MavenXpp3Writer {
 		}
 		if ((deploymentRepository.getLayout() != null) && !deploymentRepository.getLayout().equals("default")) {
 			this.write("layout", deploymentRepository.getLayout(), serializer);
+		}
+		if (!deploymentRepository.isUniqueVersion()) {
+			this.write("uniqueVersion", String.valueOf(deploymentRepository.isUniqueVersion()), serializer);
+		}
+		if (deploymentRepository.getReleases() != null) {
+			writeRepositoryPolicy(deploymentRepository.getReleases(), "releases", serializer);
+		}
+		if (deploymentRepository.getSnapshots() != null) {
+			writeRepositoryPolicy(deploymentRepository.getSnapshots(), "snapshots", serializer);
 		}
 		serializer.endTag(NAMESPACE, tagName);
 	}
