@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.ActivationFile;
@@ -966,7 +967,18 @@ public class MavenXpp3Writer {
 	}
 
 	private void writeMap(Map<Object, Object> map, MXSerializer serializer) throws IOException {
-		for (Map.Entry<Object, Object> entry : map.entrySet()) {
+		TreeSet<Map.Entry<Object, Object>> entrySet = new TreeSet<>((a, b) -> {
+			if (a == b) {
+				return 0;
+			} else if (a == null) {
+				return -1;
+			} else if (b == null) {
+				return 1;
+			}
+			return a.getKey().toString().compareTo(b.getKey().toString());
+		});
+		entrySet.addAll(map.entrySet());
+		for (Map.Entry<Object, Object> entry : entrySet) {
 			this.write(entry, serializer);
 		}
 	}
