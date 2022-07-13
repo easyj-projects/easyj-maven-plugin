@@ -967,6 +967,7 @@ public class MavenXpp3Writer {
 	}
 
 	private void writeMap(Map<Object, Object> map, MXSerializer serializer) throws IOException {
+		// @since 1.0.3：新增排序功能
 		TreeSet<Map.Entry<Object, Object>> entrySet = new TreeSet<>((a, b) -> {
 			if (a == b) {
 				return 0;
