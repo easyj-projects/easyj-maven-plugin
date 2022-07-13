@@ -830,12 +830,6 @@ public class MavenXpp3Writer {
 
 	private void writeRepository(Repository repository, String tagName, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, tagName);
-		if (repository.getReleases() != null) {
-			writeRepositoryPolicy(repository.getReleases(), "releases", serializer);
-		}
-		if (repository.getSnapshots() != null) {
-			writeRepositoryPolicy(repository.getSnapshots(), "snapshots", serializer);
-		}
 		if (repository.getId() != null) {
 			this.write("id", repository.getId(), serializer);
 		}
@@ -847,6 +841,12 @@ public class MavenXpp3Writer {
 		}
 		if ((repository.getLayout() != null) && !repository.getLayout().equals("default")) {
 			this.write("layout", repository.getLayout(), serializer);
+		}
+		if (repository.getReleases() != null) {
+			writeRepositoryPolicy(repository.getReleases(), "releases", serializer);
+		}
+		if (repository.getSnapshots() != null) {
+			writeRepositoryPolicy(repository.getSnapshots(), "snapshots", serializer);
 		}
 		serializer.endTag(NAMESPACE, tagName);
 	}
