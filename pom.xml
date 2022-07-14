@@ -35,6 +35,7 @@
 		<mavenAnnotationsVersion>3.6.4</mavenAnnotationsVersion>
 
 		<junit.version>5.8.2</junit.version>
+		<jsr305.version>3.0.2</jsr305.version>
 	</properties>
 
 	<dependencies>
@@ -56,6 +57,13 @@
 			<artifactId>junit-jupiter</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>${jsr305.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

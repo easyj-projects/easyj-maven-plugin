@@ -13,6 +13,18 @@ jobs:
     strategy:
       matrix:
         java: [ 8, 11, 17 ]
+        mavenVersion: [
+            3.8.6,
+            3.6.3,
+            3.5.4,
+            3.3.9,
+            3.2.5,
+            3.1.1,
+            3.0.5,
+            #2.2.1,
+            #2.1.0,
+            #2.0.11
+        ]
     steps:
       # step 1
       - name: "Checkout"
@@ -29,13 +41,12 @@ jobs:
       - name: "Run Test With Maven"
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: if [ "${{ matrix.java }}" == "8" ]; then
-            mvn clean install -e -B -Pcicd8 -Duser.timezone=GMT+0 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            mvn clean install -e -B -Pcicd8 -Duser.timezone=GMT+0 -DmavenVersion=${{ matrix.mavenVersion }} -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
-            mvn clean install -e -B -Pcicd  -Duser.timezone=GMT+0 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            mvn clean install -e -B -Pcicd  -Duser.timezone=GMT+0 -DmavenVersion=${{ matrix.mavenVersion }} -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
-
 
       # step 4
       - name: "Codecov"
-        if: matrix.java == '8' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
+        if: matrix.java == '8' && matrix.mavenVersion == '3.8.6' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
         uses: codecov/codecov-action@v2.1.0

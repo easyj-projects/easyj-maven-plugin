@@ -17,9 +17,11 @@ package icu.easyj.maven.plugin.mojo.utils;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import javax.annotation.Nullable;
 
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.ActivationFile;
@@ -498,9 +500,7 @@ public class MavenXpp3Writer {
 		//serializer.attribute("", "xsi:schemaLocation", "http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd");
 		serializer.getWriter().write(" xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
 
-		if (model.getChildProjectUrlInheritAppendPath() != null) {
-			serializer.attribute(NAMESPACE, "child.project.url.inherit.append.path", model.getChildProjectUrlInheritAppendPath());
-		}
+		this.writeAttributeByMethod(model, "getChildProjectUrlInheritAppendPath", "child.project.url.inherit.append.path", serializer);
 		if (model.getModelVersion() != null) {
 			this.write("modelVersion", model.getModelVersion(), serializer);
 		}
@@ -887,15 +887,9 @@ public class MavenXpp3Writer {
 
 	private void writeScm(Scm scm, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "scm");
-		if (scm.getChildScmConnectionInheritAppendPath() != null) {
-			serializer.attribute(NAMESPACE, "child.scm.connection.inherit.append.path", scm.getChildScmConnectionInheritAppendPath());
-		}
-		if (scm.getChildScmDeveloperConnectionInheritAppendPath() != null) {
-			serializer.attribute(NAMESPACE, "child.scm.developerConnection.inherit.append.path", scm.getChildScmDeveloperConnectionInheritAppendPath());
-		}
-		if (scm.getChildScmUrlInheritAppendPath() != null) {
-			serializer.attribute(NAMESPACE, "child.scm.url.inherit.append.path", scm.getChildScmUrlInheritAppendPath());
-		}
+		this.writeAttributeByMethod(scm, "getChildScmConnectionInheritAppendPath", "child.scm.connection.inherit.append.path", serializer);
+		this.writeAttributeByMethod(scm, "getChildScmDeveloperConnectionInheritAppendPath", "child.scm.developerConnection.inherit.append.path", serializer);
+		this.writeAttributeByMethod(scm, "getChildScmUrlInheritAppendPath", "child.scm.url.inherit.append.path", serializer);
 		if (scm.getConnection() != null) {
 			this.write("connection", scm.getConnection(), serializer);
 		}
@@ -913,9 +907,7 @@ public class MavenXpp3Writer {
 
 	private void writeSite(Site site, MXSerializer serializer) throws IOException {
 		serializer.startTag(NAMESPACE, "site");
-		if (site.getChildSiteUrlInheritAppendPath() != null) {
-			serializer.attribute(NAMESPACE, "child.site.url.inherit.append.path", site.getChildSiteUrlInheritAppendPath());
-		}
+		this.writeAttributeByMethod(site, "getChildSiteUrlInheritAppendPath", "child.site.url.inherit.append.path", serializer);
 		if (site.getId() != null) {
 			this.write("id", site.getId(), serializer);
 		}
@@ -989,6 +981,34 @@ public class MavenXpp3Writer {
 		this.writeMap(map, serializer);
 		serializer.endTag(NAMESPACE, tagName);
 	}
+
+
+	//region 低版本maven兼容
+
+	@Nullable
+	private <T> T invokeMethod(Object obj, String methodName) {
+		Method method;
+		try {
+			method = obj.getClass().getMethod(methodName);
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
+
+		try {
+			return (T)method.invoke(obj);
+		} catch (Exception e) {
+			throw new RuntimeException("调用方法 '" + method.getName() + "' 失败", e);
+		}
+	}
+
+	private void writeAttributeByMethod(Object obj, String methodName, String attributeName, MXSerializer serializer) throws IOException {
+		String attributeValue = this.invokeMethod(obj, methodName);
+		if (attributeValue != null) {
+			serializer.attribute(NAMESPACE, attributeName, attributeValue);
+		}
+	}
+
+	//endregion
 
 
 	@FunctionalInterface

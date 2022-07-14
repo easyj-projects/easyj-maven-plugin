@@ -20,6 +20,8 @@ import java.io.StringWriter;
 import java.util.Properties;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Scm;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +30,6 @@ import org.junit.jupiter.api.Test;
  *
  * @author wangliang181230
  */
-@Disabled("手动测试")
 public class MavenXpp3WriterTest {
 
 	protected static final int POM_WRITER_SIZE = 4096;
@@ -42,6 +43,11 @@ public class MavenXpp3WriterTest {
 		properties.put("bbb", "");
 		model.setProperties(properties);
 
+		Scm scm = new Scm();
+		scm.setChildScmConnectionInheritAppendPath("aaaa");
+		model.setScm(scm);
+
+
 		MavenXpp3Writer pomWriter = new MavenXpp3Writer();
 		pomWriter.setFileComment("测试fileComment");
 		pomWriter.setUseTabIndent(true);
@@ -51,11 +57,21 @@ public class MavenXpp3WriterTest {
 		StringBuffer buffer = stringWriter.getBuffer();
 
 		String pomStr = buffer.toString().replaceAll("(\r?\n){2,}", "\r\n").replace(" />", "/>");
-
 		System.out.println(pomStr);
+
+		Assertions.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+				"<!--测试fileComment-->\n" +
+				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
+				"\t<scm child.scm.connection.inherit.append.path=\"aaaa\"/>\n" +
+				"\t<properties>\n" +
+				"\t\t<aaa>111</aaa>\n" +
+				"\t\t<bbb/>\n" +
+				"\t</properties>\n" +
+				"</project>\n", pomStr.replace("\r", ""));
 	}
 
 	@Test
+	@Disabled("不用测试")
 	public void testReplace() {
 		String data = "  <properties>\r\n" +
 				"    <a>  \r\n" +
