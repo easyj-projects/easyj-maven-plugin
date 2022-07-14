@@ -17,6 +17,7 @@ package icu.easyj.maven.plugin.mojo.utils;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 import org.apache.maven.model.Model;
@@ -35,7 +36,7 @@ public class MavenXpp3WriterTest {
 	protected static final int POM_WRITER_SIZE = 4096;
 
 	@Test
-	public void testWrite() throws IOException {
+	public void testWrite() throws IOException, IllegalAccessException, InvocationTargetException {
 		Model model = new Model();
 
 		Properties properties = new Properties();
@@ -44,7 +45,13 @@ public class MavenXpp3WriterTest {
 		model.setProperties(properties);
 
 		Scm scm = new Scm();
-		scm.setChildScmConnectionInheritAppendPath("aaaa");
+		//scm.setChildScmConnectionInheritAppendPath("aaaa");
+		boolean hasMethod = true;
+		try {
+			Scm.class.getMethod("setChildScmConnectionInheritAppendPath", String.class).invoke(scm, "aaaa");
+		} catch (NoSuchMethodException e) {
+			hasMethod = false;
+		}
 		model.setScm(scm);
 
 
@@ -62,7 +69,7 @@ public class MavenXpp3WriterTest {
 		Assertions.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 				"<!--测试fileComment-->\n" +
 				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
-				"\t<scm child.scm.connection.inherit.append.path=\"aaaa\"/>\n" +
+				"\t<scm" + (hasMethod ? " child.scm.connection.inherit.append.path=\"aaaa\"" : "") + "/>\n" +
 				"\t<properties>\n" +
 				"\t\t<aaa>111</aaa>\n" +
 				"\t\t<bbb/>\n" +
