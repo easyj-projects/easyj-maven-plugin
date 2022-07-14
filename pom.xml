@@ -31,7 +31,7 @@
 	</issueManagement>
 
 	<properties>
-		<mavenVersion>3.8.6</mavenVersion>
+		<maven.version>3.8.6</maven.version>
 		<mavenAnnotationsVersion>3.6.4</mavenAnnotationsVersion>
 
 		<junit.version>5.8.2</junit.version>
@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
-			<version>${mavenVersion}</version>
+			<version>${maven.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
