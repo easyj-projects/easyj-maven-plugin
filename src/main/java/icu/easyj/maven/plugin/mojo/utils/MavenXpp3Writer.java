@@ -983,7 +983,7 @@ public class MavenXpp3Writer {
 	}
 
 
-	//region 低版本maven兼容
+	//region @since 1.0.3：兼容低版本maven
 
 	@Nullable
 	private <T> T invokeMethod(Object obj, String methodName) {
