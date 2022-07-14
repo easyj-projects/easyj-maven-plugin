@@ -23,7 +23,6 @@ import java.util.Properties;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Scm;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -77,8 +76,8 @@ public class MavenXpp3WriterTest {
 				"</project>\n", pomStr.replace("\r", ""));
 	}
 
-	@Test
-	@Disabled("不用测试")
+	//@Test
+	//@Disabled("不用测试")
 	public void testReplace() {
 		String data = "  <properties>\r\n" +
 				"    <a>  \r\n" +
