@@ -66,7 +66,10 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	private String includeGroupIds;
 
 	/**
-	 * 由于 {@link this#includeGroupIds} 经常用于配置在框架中，所以添加了此属性，在项目中个性化配置
+	 * 由于 {@link #includeGroupIds} 经常用于配置在框架中，所以添加了此属性，在项目中个性化配置。<br>
+	 * 当 {@link #includeGroupIds} 未配置时，此配置也无效。
+	 *
+	 * @since 1.0.4
 	 */
 	@Parameter(property = "maven.spring-boot-extend.additionalIncludeGroupIds")
 	private String additionalIncludeGroupIds;
@@ -276,12 +279,12 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 	private Set<String> getIncludeGroupIds() {
 		String includeGroupIdsStr = this.includeGroupIds;
+		if (ObjectUtils.isEmpty(includeGroupIdsStr)) {
+			return null;
+		}
+
 		if (ObjectUtils.isNotEmpty(this.additionalIncludeGroupIds)) {
-			if (ObjectUtils.isEmpty(includeGroupIdsStr)) {
-				includeGroupIdsStr = this.additionalIncludeGroupIds;
-			} else {
-				includeGroupIdsStr += "," + this.additionalIncludeGroupIds;
-			}
+			includeGroupIdsStr += "," + this.additionalIncludeGroupIds;
 		}
 
 		// string 转为 set
