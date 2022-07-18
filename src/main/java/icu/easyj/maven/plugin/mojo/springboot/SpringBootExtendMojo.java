@@ -65,6 +65,12 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	@Parameter(property = "maven.spring-boot-extend.includeGroupIds")
 	private String includeGroupIds;
 
+	/**
+	 * 由于 {@link this#includeGroupIds} 经常用于配置在框架中，所以添加了此属性，在项目中个性化配置
+	 */
+	@Parameter(property = "maven.spring-boot-extend.additionalIncludeGroupIds")
+	private String additionalIncludeGroupIds;
+
 	@Parameter(property = "maven.spring-boot-extend.commonDependencyPatterns")
 	private String commonDependencyPatterns;
 
@@ -147,12 +153,8 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	//region 功能2：includeGroupIds
 
 	private String includeDependencies() {
-		if (ObjectUtils.isEmpty(includeGroupIds)) {
-			return null;
-		}
-
-		// string 转为 set
-		Set<String> includeGroupIds = StringUtils.toTreeSet(this.includeGroupIds);
+		// 获取 includeGroupIds
+		Set<String> includeGroupIds = this.getIncludeGroupIds();
 		if (includeGroupIds.isEmpty()) {
 			return null;
 		}
@@ -270,6 +272,20 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		}
 
 		return loaderPath;
+	}
+
+	private Set<String> getIncludeGroupIds() {
+		String includeGroupIdsStr = this.includeGroupIds;
+		if (ObjectUtils.isNotEmpty(this.additionalIncludeGroupIds)) {
+			if (ObjectUtils.isEmpty(includeGroupIdsStr)) {
+				includeGroupIdsStr = this.additionalIncludeGroupIds;
+			} else {
+				includeGroupIdsStr += "," + this.additionalIncludeGroupIds;
+			}
+		}
+
+		// string 转为 set
+		return StringUtils.toTreeSet(includeGroupIdsStr);
 	}
 
 	private boolean createLibDirAndZip(String libDirName, List<File> jarFiles) {
