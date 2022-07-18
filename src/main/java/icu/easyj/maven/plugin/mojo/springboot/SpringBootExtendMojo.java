@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nullable;
+
 import icu.easyj.maven.plugin.mojo.utils.IOUtils;
 import icu.easyj.maven.plugin.mojo.utils.MatchUtils;
 import icu.easyj.maven.plugin.mojo.utils.ObjectUtils;
@@ -158,7 +160,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	private String includeDependencies() {
 		// 获取 includeGroupIds
 		Set<String> includeGroupIds = this.getIncludeGroupIds();
-		if (includeGroupIds.isEmpty()) {
+		if (ObjectUtils.isEmpty(includeGroupIds)) {
 			return null;
 		}
 		// 打印 includeGroupIds
@@ -277,6 +279,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		return loaderPath;
 	}
 
+	@Nullable
 	private Set<String> getIncludeGroupIds() {
 		String includeGroupIdsStr = this.includeGroupIds;
 		if (ObjectUtils.isEmpty(includeGroupIdsStr)) {
