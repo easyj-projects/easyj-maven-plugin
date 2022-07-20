@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
 
+import icu.easyj.maven.plugin.mojo.utils.IOUtils;
 import icu.easyj.maven.plugin.mojo.utils.MavenXpp3Writer;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
@@ -77,7 +78,7 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 		}
 
 		// 不同的maven版本，换行数量有些微不同，将多个连续的换行替换成单个换行
-		pomFileString = pomFileString.replaceAll("(\r?\n){2,}", "\r\n");
+		pomFileString = pomFileString.replaceAll("(\r?\n){2,}", IOUtils.LINE_SEPARATOR);
 		// 去除多余的空格
 		pomFileString = pomFileString.replace(" />", "/>");
 

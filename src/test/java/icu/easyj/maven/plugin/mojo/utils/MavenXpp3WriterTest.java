@@ -60,7 +60,7 @@ public class MavenXpp3WriterTest {
 		pomWriter.write(stringWriter);
 		StringBuffer buffer = stringWriter.getBuffer();
 
-		String pomStr = buffer.toString().replaceAll("(\r?\n){2,}", "\r\n").replace(" />", "/>");
+		String pomStr = buffer.toString().replaceAll("(\r?\n){2,}", IOUtils.LINE_SEPARATOR).replace(" />", "/>");
 		System.out.println(pomStr);
 
 		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
