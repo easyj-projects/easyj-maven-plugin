@@ -28,7 +28,8 @@ import java.io.IOException;
  */
 public abstract class IOUtils {
 
-	public static final String LINE_SEPARATOR = System.getProperty("os.name").contains("Windows") ? "\r\n" : "\n";
+	//public static final String LINE_SEPARATOR = System.getProperty("os.name").contains("Windows") ? "\r\n" : "\n";
+	public static final String LINE_SEPARATOR = "\n";
 
 
 	/**

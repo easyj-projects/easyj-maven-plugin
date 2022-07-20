@@ -77,8 +77,10 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 			throw new MojoExecutionException("Internal I/O error!", e);
 		}
 
+		// 去除 '\r'
+		pomFileString = pomFileString.replace("\r", "");
 		// 不同的maven版本，换行数量有些微不同，将多个连续的换行替换成单个换行
-		pomFileString = pomFileString.replaceAll("(\r?\n){2,}", IOUtils.LINE_SEPARATOR);
+		pomFileString = pomFileString.replaceAll("\n{2,}", IOUtils.LINE_SEPARATOR);
 		// 去除多余的空格
 		pomFileString = pomFileString.replace(" />", "/>");
 

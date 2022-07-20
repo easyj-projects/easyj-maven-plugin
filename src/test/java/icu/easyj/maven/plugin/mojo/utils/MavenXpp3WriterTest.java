@@ -60,9 +60,7 @@ public class MavenXpp3WriterTest {
 		pomWriter.write(stringWriter);
 		StringBuffer buffer = stringWriter.getBuffer();
 
-		String pomStr = buffer.toString().replaceAll("(\r?\n){2,}", IOUtils.LINE_SEPARATOR).replace(" />", "/>");
-		System.out.println(pomStr);
-
+		// 预期值
 		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 				"<!--测试fileComment-->\n" +
 				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
@@ -72,7 +70,16 @@ public class MavenXpp3WriterTest {
 				"\t\t<bbb/>\n" +
 				"\t</properties>\n" +
 				"</project>\n";
-		String actual = pomStr.replace("\r", "");
+
+		// 实际值
+		String actual = buffer.toString()
+				.replace("\r", "")
+				.replaceAll("\n{2,}", IOUtils.LINE_SEPARATOR)
+				.replace(" />", "/>");
+		// 打印一下实际值
+		System.out.println(actual);
+
+		// 比较预期值与实际值
 		Assertions.assertEquals(expected, actual);
 	}
 
