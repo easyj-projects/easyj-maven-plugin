@@ -2,19 +2,12 @@ name: "Publish To OSS"
 
 on:
   push:
-    branches: [ develop, 0.*.*, 1.*.*, 2.*.* ]
+    branches: [ master ]
 
 jobs:
   publish:
-    name: "Publish"
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [
-            #macos-latest,  #会报错
-            #ubuntu-latest, #会报错
-            windows-latest  #成功
-        ]
+    name: "Publish To OSS"
+    runs-on: ubuntu-latest
     steps:
       # step 1
       - name: "Checkout"
@@ -26,22 +19,19 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 8
+          server-id: ossrh
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_PASSWORD
 
       # step 3
-      #- name: "Install GPG For MacOS"
-      #  if: startsWith(matrix.os, 'macos')
-      #  run: brew install gnupg
+      - name: "Import GPG-SECRET-KEY"
+        run: |
+          cat <(echo -e "${{ secrets.GPG_SECRET_KEY }}") | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
 
       # step 4
-      - name: "Publish To OSS"
-        uses: samuelmeuli/action-maven-publish@v1.4.0
-        with:
-          nexus_username: ${{ secrets.OSSRH_USER }}
-          nexus_password: ${{ secrets.OSSRH_PASSWORD }}
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          #命令模板：mvn ${mavenGoalsPhases} --batch-mode --activate-profiles ${mavenProfiles} --settings ${mavenSettingsPath} ${mavenArgs}
-          #命令源码：https://github.com/samuelmeuli/action-maven-publish/blob/master/index.js
-          #以下两个配置会拼接到上面的命令模板中
-          maven_goals_phases: clean deploy -e -Dmaven-javadoc-plugin.version=3.2.0 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-          maven_profiles: publish-auto
+      - name: "Package and Publish-To-OSS"
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+        run: mvn clean deploy -Ppublish-auto --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -e -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
