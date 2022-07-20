@@ -79,31 +79,33 @@ public class MavenXpp3Writer {
 	private static final String LINE_SEPARATOR = System.getProperty("os.name").contains("Windows") ? "\r\n" : "\n";
 
 
-	private String fileComment = null;
+	private final Model model;
 
-	private boolean useTabIndent = false;
+	private final String fileComment;
+
+	private final boolean useTabIndent;
+
+
+	public MavenXpp3Writer(Model model, String fileComment, boolean useTabIndent) {
+		this.model = model;
+		this.fileComment = fileComment;
+		this.useTabIndent = useTabIndent;
+	}
 
 
 	//------------------/
 	//- Public Methods -/
 	//------------------/
 
-	public void setFileComment(String fileComment) {
-		this.fileComment = fileComment;
-	}
 
-	public void setUseTabIndent(boolean useTabIndent) {
-		this.useTabIndent = useTabIndent;
-	}
-
-	public void write(Writer writer, Model model) throws IOException {
+	public void write(Writer writer) throws IOException {
 		MXSerializer serializer = new MXSerializer();
 		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-indentation", this.useTabIndent ? "\t" : "  ");
 		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-line-separator", LINE_SEPARATOR);
 
 		serializer.setOutput(writer);
 		serializer.startDocument(model.getModelEncoding(), null);
-		writeModel(model, serializer);
+		writeModel(serializer);
 		serializer.endDocument();
 	}
 
@@ -487,7 +489,7 @@ public class MavenXpp3Writer {
 		serializer.endTag(NAMESPACE, "mailingList");
 	}
 
-	private void writeModel(Model model, MXSerializer serializer) throws IOException {
+	private void writeModel(MXSerializer serializer) throws IOException {
 		if (this.fileComment != null) {
 			serializer.text(LINE_SEPARATOR);
 			serializer.comment(this.fileComment);

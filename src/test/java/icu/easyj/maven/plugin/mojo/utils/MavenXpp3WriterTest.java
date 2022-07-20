@@ -54,18 +54,16 @@ public class MavenXpp3WriterTest {
 		model.setScm(scm);
 
 
-		MavenXpp3Writer pomWriter = new MavenXpp3Writer();
-		pomWriter.setFileComment("测试fileComment");
-		pomWriter.setUseTabIndent(true);
+		MavenXpp3Writer pomWriter = new MavenXpp3Writer(model, "测试fileComment", true);
 
 		StringWriter stringWriter = new StringWriter(POM_WRITER_SIZE);
-		pomWriter.write(stringWriter, model);
+		pomWriter.write(stringWriter);
 		StringBuffer buffer = stringWriter.getBuffer();
 
 		String pomStr = buffer.toString().replaceAll("(\r?\n){2,}", "\r\n").replace(" />", "/>");
 		System.out.println(pomStr);
 
-		Assertions.assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 				"<!--测试fileComment-->\n" +
 				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
 				"\t<scm" + (hasMethod ? " child.scm.connection.inherit.append.path=\"aaaa\"" : "") + "/>\n" +
@@ -73,7 +71,9 @@ public class MavenXpp3WriterTest {
 				"\t\t<aaa>111</aaa>\n" +
 				"\t\t<bbb/>\n" +
 				"\t</properties>\n" +
-				"</project>\n", pomStr.replace("\r", ""));
+				"</project>\n";
+		String actual = pomStr.replace("\r", "");
+		Assertions.assertEquals(expected, actual);
 	}
 
 	//@Test

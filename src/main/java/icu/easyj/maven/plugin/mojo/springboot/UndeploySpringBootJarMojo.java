@@ -46,12 +46,12 @@ public class UndeploySpringBootJarMojo extends AbstractEasyjMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		if (!skipInstall && !skipDeploy) {
-			this.info("Skip this goal, cause by \"skipInstall == false && skipDeploy == false\".");
+			this.info("Skip this goal, because \"skipInstall == false && skipDeploy == false\".");
 			return;
 		}
 
 		if (!"jar".equalsIgnoreCase(project.getPackaging())) {
-			this.info("Skip this goal, cause by \"packaging != 'jar'\"'.");
+			this.info("Skip this goal, because \"packaging != 'jar'\"'.");
 			return;
 		}
 
@@ -80,7 +80,7 @@ public class UndeploySpringBootJarMojo extends AbstractEasyjMojo {
 				this.info("Put property 'maven.deploy.skip = true'.");
 			}
 		} else {
-			this.info("Skip this goal, cause by this project is not a spring-boot application.");
+			this.info("Skip this goal, because this project is not a spring-boot application.");
 		}
 	}
 }

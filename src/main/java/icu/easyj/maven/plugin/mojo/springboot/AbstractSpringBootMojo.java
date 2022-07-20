@@ -36,7 +36,7 @@ public abstract class AbstractSpringBootMojo extends AbstractEasyjMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (!this.isSpringBootApplication()) {
-			this.info("Skip this goal, cause by this project is not a spring-boot application.");
+			this.info("Skip this goal, because this project is not a spring-boot application.");
 			return;
 		}
 

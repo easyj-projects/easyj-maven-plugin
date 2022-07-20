@@ -67,29 +67,26 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 		}
 
 		// Model to String
-		MavenXpp3Writer pomWriter = new MavenXpp3Writer();
-		pomWriter.setFileComment(this.fileComment);
-		pomWriter.setUseTabIndent(this.useTabIndent);
-
-		StringWriter stringWriter = new StringWriter(POM_WRITER_SIZE);
-		try {
-			pomWriter.write(stringWriter, model);
+		MavenXpp3Writer pomWriter = new MavenXpp3Writer(model, this.fileComment, this.useTabIndent);
+		String pomFileString;
+		try (StringWriter stringWriter = new StringWriter(POM_WRITER_SIZE)) {
+			pomWriter.write(stringWriter);
+			pomFileString = stringWriter.getBuffer().toString();
 		} catch (IOException e) {
 			throw new MojoExecutionException("Internal I/O error!", e);
 		}
-		StringBuffer buffer = stringWriter.getBuffer();
+
+		// 不同的maven版本，换行数量有些微不同，将多个连续的换行替换成单个换行
+		pomFileString = pomFileString.replaceAll("(\r?\n){2,}", "\r\n");
+		// 去除多余的空格
+		pomFileString = pomFileString.replace(" />", "/>");
 
 		// Write String to POM file
-		this.writeStringToFile(buffer.toString(), pomFile, model.getModelEncoding());
+		this.writeStringToFile(pomFileString, pomFile, model.getModelEncoding());
 	}
 
 	private void writeStringToFile(String data, File file, String encoding)
 			throws MojoExecutionException {
-		// 不同的maven版本，换行数量有些微不同，将多个连续的换行替换成单个换行
-		data = data.replaceAll("(\r?\n){2,}", "\r\n");
-		// 去除多余的空格
-		data = data.replace(" />", "/>");
-
 		byte[] binaryData;
 		try {
 			binaryData = data.getBytes(encoding);
