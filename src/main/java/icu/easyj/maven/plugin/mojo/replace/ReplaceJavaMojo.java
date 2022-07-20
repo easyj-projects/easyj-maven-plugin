@@ -42,12 +42,12 @@ public class ReplaceJavaMojo extends AbstractEasyjMojo {
 
 	@Parameter
 	private Set<String> mainPaths;
-	@Parameter(defaultValue = "${project.build.directory}/generated-sources/easyj-maven-plugin_placeholder/java")
+	@Parameter(defaultValue = "${project.build.directory}/generated-sources/easyj-maven-plugin_replace-java/java")
 	private File generatedSourcesDirectory;
 
 	@Parameter
 	private Set<String> testPaths;
-	@Parameter(defaultValue = "${project.build.directory}/generated-test-sources/easyj-maven-plugin_placeholder/java")
+	@Parameter(defaultValue = "${project.build.directory}/generated-test-sources/easyj-maven-plugin_replace-java/java")
 	private File generatedTestSourcesDirectory;
 
 	@Parameter
