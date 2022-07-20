@@ -84,7 +84,7 @@ public class PackageZipMojo extends AbstractMojo {
 		try {
 			fos = new FileOutputStream(outputFilePathname);
 		} catch (FileNotFoundException e) {
-			throw new RuntimeException("创建文件流失败", e);
+			throw new RuntimeException("Create 'fos' failed", e);
 		}
 
 		getLog().info("");
@@ -93,7 +93,7 @@ public class PackageZipMojo extends AbstractMojo {
 		try {
 			ZipUtils.toZip(files, fos, true, null);
 		} catch (IOException e) {
-			throw new RuntimeException("压缩文件流失败", e);
+			throw new RuntimeException("Zip files failed", e);
 		}
 	}
 }

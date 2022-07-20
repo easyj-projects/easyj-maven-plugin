@@ -76,8 +76,6 @@ public class MavenXpp3Writer {
 
 	private static final String NAMESPACE = null;
 
-	private static final String LINE_SEPARATOR = System.getProperty("os.name").contains("Windows") ? "\r\n" : "\n";
-
 
 	private final Model model;
 
@@ -101,7 +99,7 @@ public class MavenXpp3Writer {
 	public void write(Writer writer) throws IOException {
 		MXSerializer serializer = new MXSerializer();
 		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-indentation", this.useTabIndent ? "\t" : "  ");
-		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-line-separator", LINE_SEPARATOR);
+		serializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-line-separator", IOUtils.LINE_SEPARATOR);
 
 		serializer.setOutput(writer);
 		serializer.startDocument(model.getModelEncoding(), null);
@@ -491,10 +489,10 @@ public class MavenXpp3Writer {
 
 	private void writeModel(MXSerializer serializer) throws IOException {
 		if (this.fileComment != null) {
-			serializer.text(LINE_SEPARATOR);
+			serializer.text(IOUtils.LINE_SEPARATOR);
 			serializer.comment(this.fileComment);
 		}
-		serializer.text(LINE_SEPARATOR);
+		serializer.text(IOUtils.LINE_SEPARATOR);
 
 		//serializer.setPrefix("", "http://maven.apache.org/POM/4.0.0");
 		//serializer.setPrefix("xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -999,7 +997,7 @@ public class MavenXpp3Writer {
 		try {
 			return (T)method.invoke(obj);
 		} catch (Exception e) {
-			throw new RuntimeException("调用方法 '" + method.getName() + "' 失败", e);
+			throw new RuntimeException("Invoke method '" + method.getName() + "' failed", e);
 		}
 	}
 
