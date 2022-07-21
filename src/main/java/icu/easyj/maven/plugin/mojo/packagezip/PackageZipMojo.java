@@ -45,6 +45,12 @@ public class PackageZipMojo extends AbstractMojo {
 	@Parameter
 	private String outputFilePathname;
 
+	@Parameter(defaultValue = "true")
+	private boolean keepDirStructure;
+
+	@Parameter
+	private String pathInZip;
+
 
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -91,7 +97,7 @@ public class PackageZipMojo extends AbstractMojo {
 		getLog().info("The output file: " + outputFilePathname);
 
 		try {
-			ZipUtils.toZip(files, fos, true, null);
+			ZipUtils.toZip(files, fos, this.keepDirStructure, this.pathInZip);
 		} catch (IOException e) {
 			throw new RuntimeException("Zip files failed", e);
 		}

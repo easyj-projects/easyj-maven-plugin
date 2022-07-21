@@ -87,38 +87,47 @@ public class ReplaceJavaMojo extends AbstractEasyjMojo {
 			return false;
 		}
 
-		boolean needScanGeneratedSourcesDirectory = false;
-		for (String path : paths) {
-			File file = new File(this.outputDirectory, basePath + path);
+		boolean hasGeneratedFile = false; // 标记是否生成过文件
+
+		for (String relativePath : paths) {
+			File file = new File(this.outputDirectory, basePath + relativePath);
 			if (!file.exists()) {
 				continue;
 			}
 
 			if (file.isDirectory()) {
+				this.warn("Directory is not supported: " + file.getPath());
 				// 暂时不支持目录
 				continue;
 			}
 
-			// 获取文件内容，并替换占位符
-			String text = this.readAndReplacePlaceholder(file);
-
-			// 生成文件
-			if (StringUtils.isNotEmpty(text)) {
-				String generatedFilePath = generatedSourcesDirectory.getPath() + "/" + path.substring(0, path.indexOf(".java") + ".java".length());
-				File generatedFile = new File(generatedFilePath);
-
-				// 生成目录
-				generatedFile.getParentFile().mkdirs();
-
-				// 创建文件
-				IOUtils.createFile(generatedFile, text);
-				this.info("Generate java file: %s -> %s", file.getName(), generatedFile.getPath());
-
-				needScanGeneratedSourcesDirectory = true;
+			if (this.replaceFile(file, relativePath)) {
+				hasGeneratedFile = true;
 			}
 		}
 
-		return needScanGeneratedSourcesDirectory;
+		return hasGeneratedFile;
+	}
+
+	private boolean replaceFile(File file, String relativePath) throws IOException {
+		// 获取文件内容，并替换占位符
+		String text = this.readAndReplacePlaceholder(file);
+		if (StringUtils.isEmpty(text)) {
+			return false; // 文件内容为空
+		}
+
+		// 生成文件
+		String generatedFilePath = generatedSourcesDirectory.getPath() + "/" + relativePath.substring(0, relativePath.indexOf(".java") + ".java".length());
+		File generatedFile = new File(generatedFilePath);
+
+		// 生成目录
+		generatedFile.getParentFile().mkdirs();
+
+		// 创建文件
+		IOUtils.createFile(generatedFile, text);
+		this.info("Generate java file: %s -> %s", file.getName(), generatedFile.getPath());
+
+		return true;
 	}
 
 
