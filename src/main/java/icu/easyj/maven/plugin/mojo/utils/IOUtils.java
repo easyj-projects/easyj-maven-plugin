@@ -74,7 +74,6 @@ public abstract class IOUtils {
 	 *
 	 * @param file 文件
 	 * @return lastModified 最近一次修改时间
-	 * @throws IOException IO异常
 	 */
 	public static long getFileLastModified(File file) {
 		if (file.getName().endsWith(".jar")) {
