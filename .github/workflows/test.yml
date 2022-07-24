@@ -43,9 +43,9 @@ jobs:
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: |
           if [ "${{ matrix.java }}" == "8" ]; then
-            mvn clean test -e -B -Pcicd8 -Duser.timezone=GMT+0 -Dmaven.version=${{ matrix.maven }} -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            mvn clean test -Pcicd8 -Dmaven.version=${{ matrix.maven }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
-            mvn clean test -e -B -Pcicd  -Duser.timezone=GMT+0 -Dmaven.version=${{ matrix.maven }} -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            mvn clean test -Pcicd  -Dmaven.version=${{ matrix.maven }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
 
       # step 4
