@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * IO工具类
@@ -48,8 +50,8 @@ public abstract class IOUtils {
 			out.flush();
 		}
 		try {
-			targetFile.setLastModified(sourceFile.lastModified());
-		} catch (Exception ignore) {
+			targetFile.setLastModified(getFileLastModified(sourceFile));
+		} catch (SecurityException ignore) {
 		}
 	}
 
@@ -65,5 +67,29 @@ public abstract class IOUtils {
 			out.write(text.getBytes());
 			out.flush();
 		}
+	}
+
+	/**
+	 * 读取文件最近一次修改时间。
+	 *
+	 * @param file 文件
+	 * @return lastModified 最近一次修改时间
+	 * @throws IOException IO异常
+	 */
+	public static long getFileLastModified(File file) {
+		if (file.getName().endsWith(".jar")) {
+			// 如果是jar文件，则读取 /META-INF/MANIFEST.MF 文件的lastModified。
+			// 因为jar文件是和该文件一起生成的，所以这个文件的lastModified才是jar文件的实际最后生成时间
+			try (JarFile jarFile = new JarFile(file)) {
+				JarEntry jarEntry = jarFile.getJarEntry(JarFile.MANIFEST_NAME);
+				if (jarEntry != null) {
+					return jarEntry.getTime();
+				}
+			} catch (IOException ignore) {
+				// do nothing
+			}
+		}
+
+		return file.lastModified();
 	}
 }

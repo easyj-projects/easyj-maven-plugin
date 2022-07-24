@@ -84,7 +84,7 @@ public abstract class ZipUtils {
 		if (sourceFile.isFile()) {
 			// 向zip输出流中添加一个zip实体，构造器中name为zip实体的文件的名字
 			ZipEntry zipEntry = new ZipEntry(pathInZip + name);
-			zipEntry.setLastModifiedTime(FileTime.fromMillis(sourceFile.lastModified()));
+			zipEntry.setLastModifiedTime(FileTime.fromMillis(IOUtils.getFileLastModified(sourceFile)));
 			zos.putNextEntry(zipEntry);
 			// copy文件到zip输出流中
 			int len;
