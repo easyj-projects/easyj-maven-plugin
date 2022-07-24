@@ -1,4 +1,4 @@
-name: "Publish To OSS"
+name: "Publish To OSSRH"
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   publish:
-    name: "Publish To OSS"
+    name: "Publish To OSSRH"
     runs-on: ubuntu-latest
     steps:
       # step 1
@@ -24,7 +24,7 @@ jobs:
           server-password: OSSRH_PASSWORD
 
       # step 3
-      - name: "Import GPG-SECRET-KEY, Package, Publish-To-OSS"
+      - name: "Import GPG-SECRET-KEY, Package, Publish-To-OSSRH"
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
