@@ -351,9 +351,15 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 	//region -------------------- Name、Description --------------------
 
 	public void resetNameAndDescription() {
-		if (isNotEmpty(this.model.getName()) && isNotEmpty(this.originalModel.getName()) && !this.model.getName().equals(this.originalModel.getName())) {
-			this.log.info("Set Name from '" + this.originalModel.getName() + "' to '" + this.model.getName() + "'.");
-			this.originalModel.setName(this.model.getName());
+		if (isNotEmpty(this.model.getName())) {
+			if (isNotEmpty(this.originalModel.getName()) && !this.model.getName().equals(this.originalModel.getName())) {
+				this.log.info("Set Name from '" + this.originalModel.getName() + "' to '" + this.model.getName() + "'.");
+				this.originalModel.setName(this.model.getName());
+			}
+		} else if (isNotEmpty(this.config.getArtifactNameTemplate())) {
+			String name = this.replaceVariable(this.config.getArtifactNameTemplate());
+			this.log.info("Set Name from '" + this.originalModel.getName() + "' to '" + name + "' by template '" + this.config.getArtifactNameTemplate() + "'.");
+			this.originalModel.setName(name);
 		}
 		if (isNotEmpty(this.model.getDescription()) && isNotEmpty(this.originalModel.getDescription()) && !this.model.getDescription().equals(this.originalModel.getDescription())) {
 			this.log.info("Set Description from '" + this.originalModel.getDescription() + "' to '" + this.model.getDescription() + "'.");

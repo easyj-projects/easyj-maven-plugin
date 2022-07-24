@@ -97,5 +97,9 @@ public class SimplifyPomMojoConfig {
 		return mojo.expandImportDependencyManagement;
 	}
 
+	public String getArtifactNameTemplate() {
+		return mojo.artifactNameTemplate;
+	}
+
 	//endregion
 }

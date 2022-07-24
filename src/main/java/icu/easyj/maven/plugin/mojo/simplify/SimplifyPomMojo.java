@@ -69,6 +69,9 @@ public class SimplifyPomMojo extends AbstractSimplifyPomMojo {
 	@Parameter
 	Boolean removeParent;
 
+	@Parameter
+	String artifactNameTemplate;
+
 
 	@Parameter(defaultValue = "false")
 	boolean keepProvidedDependencies;
