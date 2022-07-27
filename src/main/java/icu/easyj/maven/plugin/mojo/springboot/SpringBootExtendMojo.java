@@ -359,7 +359,8 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 				totalLength += fileLength;
 			}
-			history.insert(0, "Total file size: " + totalLength + " B" + " / " + (totalLength / 1024) + " KB" + IOUtils.LINE_SEPARATOR
+			history.insert(0, project.getGroupId() + ":" + project.getArtifactId() + ":" + project.getVersion() + IOUtils.LINE_SEPARATOR + IOUtils.LINE_SEPARATOR
+					+ "Total file size: " + totalLength + " B" + " / " + (totalLength / 1024) + " KB" + IOUtils.LINE_SEPARATOR
 					+ "Number of files: " + jarFiles.size() + IOUtils.LINE_SEPARATOR
 					+ IOUtils.LINE_SEPARATOR);
 			String newHistoryTxt = history.toString().trim();
