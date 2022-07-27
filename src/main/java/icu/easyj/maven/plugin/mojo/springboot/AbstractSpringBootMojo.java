@@ -15,6 +15,7 @@
  */
 package icu.easyj.maven.plugin.mojo.springboot;
 
+import java.io.IOException;
 import java.util.List;
 
 import icu.easyj.maven.plugin.mojo.AbstractEasyjMojo;
@@ -40,11 +41,15 @@ public abstract class AbstractSpringBootMojo extends AbstractEasyjMojo {
 			return;
 		}
 
-		this.doExecute();
+		try {
+			this.doExecute();
+		} catch (IOException e) {
+			throw new RuntimeException("IO exception", e);
+		}
 	}
 
 
-	abstract void doExecute() throws MojoExecutionException, MojoFailureException;
+	abstract void doExecute() throws MojoExecutionException, MojoFailureException, IOException;
 
 
 	/**

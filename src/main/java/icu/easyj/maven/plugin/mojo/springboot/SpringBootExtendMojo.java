@@ -19,13 +19,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.annotation.Nullable;
 
 import icu.easyj.maven.plugin.mojo.utils.IOUtils;
@@ -47,6 +48,9 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 @Mojo(name = "spring-boot-extend", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, threadSafe = true)
 public class SpringBootExtendMojo extends AbstractSpringBootMojo {
+
+	private static final String SEPARATOR = "  |  ";
+
 
 	//region 功能1：skip install or deploy
 
@@ -92,6 +96,12 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	@Parameter(property = "maven.spring-boot-extend.zipLib", defaultValue = "true")
 	private boolean zipLib;
 
+	/**
+	 * 生成lib历史文件。主要目的是为了让开发人员或运维人员知道lib是否 '已变更且需要更新'。
+	 */
+	@Parameter(property = "maven.spring-boot-extend.createLibHistory", defaultValue = "true")
+	private boolean createLibHistory;
+
 	//endregion
 
 
@@ -113,7 +123,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 
 	@Override
-	public void doExecute() throws MojoExecutionException {
+	public void doExecute() throws MojoExecutionException, IOException {
 		this.info("The current project is a springboot application.");
 
 
@@ -157,7 +167,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 	//region 功能2：includeGroupIds
 
-	private String includeDependencies() {
+	private String includeDependencies() throws IOException {
 		// 获取 includeGroupIds
 		Set<String> includeGroupIds = this.getIncludeGroupIds();
 		if (ObjectUtils.isEmpty(includeGroupIds)) {
@@ -294,7 +304,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		return StringUtils.toTreeSet(includeGroupIdsStr);
 	}
 
-	private boolean createLibDirAndZip(String libDirName, List<File> jarFiles) {
+	private boolean createLibDirAndZip(String libDirName, List<File> jarFiles) throws IOException {
 		if (jarFiles.isEmpty()) {
 			return false;
 		}
@@ -306,6 +316,66 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		this.emptyLine();
 		this.info("Copy %d JARs to the directory: %s", jarFiles.size(), libDir.getPath());
 		this.copyFilesToDir(jarFiles, libDir);
+
+		// 生成lib-history.text
+		if (this.createLibHistory) {
+			jarFiles.sort(Comparator.comparing(f -> f.getName().toLowerCase()));
+
+			// 获取最长文件名的长度
+			int maxNumberLength = String.valueOf(jarFiles.size()).length();
+			int maxNameLength = 0;
+			int maxBLength = 0;
+			int maxKBLength = 0;
+			for (File jarFile : jarFiles) {
+				if (maxNameLength < jarFile.getName().length()) {
+					maxNameLength = jarFile.getName().length();
+				}
+				if (maxBLength < String.valueOf(jarFile.length()).length()) {
+					maxBLength = String.valueOf(jarFile.length()).length();
+				}
+				if (maxKBLength < String.valueOf(jarFile.length() / 1024).length()) {
+					maxKBLength = String.valueOf(jarFile.length() / 1024).length();
+				}
+			}
+
+			// 组装文件内容
+			StringBuilder history = new StringBuilder();
+			long totalLength = 0;
+			for (int i = 0; i < jarFiles.size(); i++) {
+				File jarFile = jarFiles.get(i);
+
+				long fileLength = jarFile.length();
+
+				history.append(this.buildIndent(maxNumberLength, i + 1)).append(i + 1) // 序号
+						.append(SEPARATOR) // 分隔符
+						.append(jarFile.getName()).append(this.buildTab(maxNameLength, jarFile.getName())) // 文件名
+						.append(SEPARATOR) // 分隔符
+						.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(IOUtils.getFileLastModified(jarFile))) // 文件最后修改时间
+						.append(SEPARATOR) // 分隔符
+						.append(this.buildIndent(maxBLength, fileLength)).append(fileLength).append(" B") // B
+						.append(SEPARATOR) // 分隔符
+						.append(this.buildIndent(maxKBLength, fileLength / 1024)).append(fileLength / 1024).append(" KB") // KB
+						.append(IOUtils.LINE_SEPARATOR); // 换行
+
+				totalLength += fileLength;
+			}
+			history.insert(0, "Total file size: " + totalLength + " B" + " / " + (totalLength / 1024) + " KB" + IOUtils.LINE_SEPARATOR
+					+ "Number of files: " + jarFiles.size() + IOUtils.LINE_SEPARATOR
+					+ IOUtils.LINE_SEPARATOR);
+			String newHistoryTxt = history.toString().trim();
+
+			// 读取现有的文件内容并与新的文件内容作比较，如果不一样，则提示警告，告知开发或运维人员需要更新外置lib了
+			File historyFile = new File(this.outputDirectory, libDirName + ".history.txt");
+			String historyTxt = IOUtils.getFileTxt(historyFile);
+			if (historyTxt != null) { // 为null时，文件不存在，说明是第一次生成
+				historyTxt = historyTxt.trim();
+				if (!historyTxt.equals(newHistoryTxt)) {
+					this.warn("'%s/' 目录中的JAR文件已变更，请自行检查历史文件 '%s/%s.history.txt' 中的变化！", libDirName, this.outputDirectory.getName(), libDirName);
+				}
+			}
+
+			IOUtils.createFile(historyFile, newHistoryTxt);
+		}
 
 		// 将依赖打包进lib.zip中
 		if (zipLib) {
@@ -335,6 +405,30 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 			}
 		}
 		return false;
+	}
+
+	private String buildTab(int maxNameLength, String name) {
+		int diff = maxNameLength - name.length();
+
+		StringBuilder sb = new StringBuilder();
+		while (diff > 0) {
+			diff -= 4;
+			sb.append("\t");
+		}
+
+		return sb.toString();
+	}
+
+	private String buildIndent(int maxSizeLength, long size) {
+		int diff = maxSizeLength - String.valueOf(size).length();
+
+		StringBuilder sb = new StringBuilder();
+		while (diff > 0) {
+			diff--;
+			sb.append(" ");
+		}
+
+		return sb.toString();
 	}
 
 	//endregion
