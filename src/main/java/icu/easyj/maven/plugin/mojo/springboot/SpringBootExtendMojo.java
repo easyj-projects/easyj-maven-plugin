@@ -411,10 +411,6 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		int diff = maxNameLength - name.length();
 
 		StringBuilder sb = new StringBuilder();
-		while (diff >= 4) {
-			diff -= 4;
-			sb.append("\t");
-		}
 		while (diff > 0) {
 			diff--;
 			sb.append(" ");
