@@ -369,12 +369,12 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 			String newHistoryTxt = history.toString().trim();
 
 			// 读取现有的文件内容并与新的文件内容作比较，如果不一样，则提示警告，告知开发或运维人员需要更新外置lib了
-			File historyFile = new File(this.outputDirectory, libDirName + ".history.txt");
+			File historyFile = new File(this.outputDirectory, libDirName + ".history.md");
 			String historyTxt = IOUtils.getFileTxt(historyFile);
 			if (historyTxt != null) { // 为null时，文件不存在，说明是第一次生成
 				historyTxt = historyTxt.trim();
 				if (!historyTxt.equals(newHistoryTxt)) {
-					this.warn("'%s/' 目录中的JAR文件已变更，请自行检查历史文件 '%s/%s.history.txt' 中的变化！", libDirName, this.outputDirectory.getName(), libDirName);
+					this.warn("'%s/' 目录中的JAR文件已变更，请自行检查历史文件 '%s/%s.history.md' 中的变化！", libDirName, this.outputDirectory.getName(), libDirName);
 				}
 			}
 
