@@ -15,7 +15,7 @@
 	<packaging>maven-plugin</packaging>
 
 	<name>${project.groupId} :: ${project.artifactId}</name>
-	<description>EasyJ开发的Maven插件，包含：简化POM功能、Shade兼容Flatten功能</description>
+	<description>EasyJ开发的Maven插件，包含：简化POM功能、SpringBoot扩展、SpringBoot辅助发布等功能</description>
 
 	<url>https://easyj.icu</url>
 

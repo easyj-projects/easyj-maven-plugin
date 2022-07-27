@@ -351,6 +351,7 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 	//region -------------------- Name、Description --------------------
 
 	public void resetNameAndDescription() {
+		// Name
 		if (isNotEmpty(this.model.getName())) {
 			if (isNotEmpty(this.originalModel.getName()) && !this.model.getName().equals(this.originalModel.getName())) {
 				this.log.info("Set Name from '" + this.originalModel.getName() + "' to '" + this.model.getName() + "'.");
@@ -358,12 +359,22 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 			}
 		} else if (isNotEmpty(this.config.getArtifactNameTemplate())) {
 			String name = this.replaceVariable(this.config.getArtifactNameTemplate());
-			this.log.info("Set Name from '" + this.originalModel.getName() + "' to '" + name + "' by template '" + this.config.getArtifactNameTemplate() + "'.");
+			this.log.info("Set Name from 'null' to '" + name + "' by template '" + this.config.getArtifactNameTemplate() + "'.");
 			this.originalModel.setName(name);
 		}
+		if (config.isOpenSourceProject() && isEmpty(this.originalModel.getName())) {
+			this.originalModel.setName(this.model.getGroupId() + " :: " + this.model.getArtifactId());
+			this.log.info("The '<name>' is required when uploading OSSRH. (" + this.model.getArtifactId() + ")\r\n" +
+					"[INFO] Set Name to the default value '" + this.originalModel.getName() + "'.");
+		}
+
+		// Description
 		if (isNotEmpty(this.model.getDescription()) && isNotEmpty(this.originalModel.getDescription()) && !this.model.getDescription().equals(this.originalModel.getDescription())) {
 			this.log.info("Set Description from '" + this.originalModel.getDescription() + "' to '" + this.model.getDescription() + "'.");
 			this.originalModel.setDescription(this.model.getDescription());
+		}
+		if (config.isOpenSourceProject() && isEmpty(this.originalModel.getDescription())) {
+			this.log.warn("The '<description>' is required when uploading OSSRH. Please set a value immediately.");
 		}
 	}
 
