@@ -49,7 +49,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Mojo(name = "spring-boot-extend", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, threadSafe = true)
 public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
-	private static final String SEPARATOR = "  |  ";
+	private static final String SEPARATOR = " | ";
 
 
 	//region 功能1：skip install or deploy
@@ -319,66 +319,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 		// 生成lib-history.text
 		if (this.createLibHistory) {
-			jarFiles.sort(Comparator.comparing(f -> f.getName().toLowerCase()));
-
-			// 获取最长文件名的长度
-			int maxNumberLength = String.valueOf(jarFiles.size()).length();
-			int maxNameLength = 0;
-			int maxBLength = 0;
-			int maxKBLength = 0;
-			for (File jarFile : jarFiles) {
-				if (maxNameLength < jarFile.getName().length()) {
-					maxNameLength = jarFile.getName().length();
-				}
-				if (maxBLength < String.valueOf(jarFile.length()).length()) {
-					maxBLength = String.valueOf(jarFile.length()).length();
-				}
-				if (maxKBLength < String.valueOf(jarFile.length() / 1024).length()) {
-					maxKBLength = String.valueOf(jarFile.length() / 1024).length();
-				}
-			}
-
-			// 组装文件内容
-			StringBuilder history = new StringBuilder();
-			long totalLength = 0;
-			for (int i = 0; i < jarFiles.size(); i++) {
-				File jarFile = jarFiles.get(i);
-
-				long fileLength = jarFile.length();
-
-				history.append(this.buildIndent(maxNumberLength, i + 1)).append(i + 1) // 序号
-						.append(SEPARATOR) // 分隔符
-						.append(jarFile.getName()).append(this.buildIndent(maxNameLength, jarFile.getName())) // 文件名
-						.append(SEPARATOR) // 分隔符
-						.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(IOUtils.getFileLastModified(jarFile))) // 文件最后修改时间
-						.append(SEPARATOR) // 分隔符
-						.append(this.buildIndent(maxBLength, fileLength)).append(fileLength).append(" B") // B
-						.append(SEPARATOR) // 分隔符
-						.append(this.buildIndent(maxKBLength, fileLength / 1024)).append(fileLength / 1024).append(" KB") // KB
-						.append(IOUtils.LINE_SEPARATOR); // 换行
-
-				totalLength += fileLength;
-			}
-			history.insert(0, "groupId: " + project.getGroupId() + IOUtils.LINE_SEPARATOR
-					+ "artifactId: " + project.getArtifactId() + IOUtils.LINE_SEPARATOR
-					+ "version: " + project.getVersion() + IOUtils.LINE_SEPARATOR
-					+ IOUtils.LINE_SEPARATOR
-					+ "Total file size: " + totalLength + " B" + " / " + (totalLength / 1024) + " KB" + IOUtils.LINE_SEPARATOR
-					+ "Number of files: " + jarFiles.size() + IOUtils.LINE_SEPARATOR
-					+ IOUtils.LINE_SEPARATOR);
-			String newHistoryTxt = history.toString().trim();
-
-			// 读取现有的文件内容并与新的文件内容作比较，如果不一样，则提示警告，告知开发或运维人员需要更新外置lib了
-			File historyFile = new File(this.outputDirectory, libDirName + ".history.md");
-			String historyTxt = IOUtils.getFileTxt(historyFile);
-			if (historyTxt != null) { // 为null时，文件不存在，说明是第一次生成
-				historyTxt = historyTxt.trim();
-				if (!historyTxt.equals(newHistoryTxt)) {
-					this.warn("'%s/' 目录中的JAR文件已变更，请自行检查历史文件 '%s/%s.history.md' 中的变化！", libDirName, this.outputDirectory.getName(), libDirName);
-				}
-			}
-
-			IOUtils.createFile(historyFile, newHistoryTxt);
+			this.createLibHistoryFile(libDirName, jarFiles);
 		}
 
 		// 将依赖打包进lib.zip中
@@ -402,6 +343,87 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		return true;
 	}
 
+	private void createLibHistoryFile(String libDirName, List<File> jarFiles) throws IOException {
+		jarFiles.sort(Comparator.comparing(f -> f.getName().toLowerCase()));
+
+		// 获取最长文件名的长度
+		int maxNumberLength = String.valueOf(jarFiles.size()).length();
+		int maxNameLength = 0;
+		int maxBLength = 0;
+		int maxKBLength = 0;
+		for (File jarFile : jarFiles) {
+			if (maxNameLength < jarFile.getName().length()) {
+				maxNameLength = jarFile.getName().length();
+			}
+			if (maxBLength < String.valueOf(jarFile.length()).length()) {
+				maxBLength = String.valueOf(jarFile.length()).length();
+			}
+			if (maxKBLength < String.valueOf(jarFile.length() / 1024).length()) {
+				maxKBLength = String.valueOf(jarFile.length() / 1024).length();
+			}
+		}
+		maxNumberLength = Math.max(maxNumberLength, 3);
+		maxNameLength = Math.max(maxNameLength, 9);
+		maxBLength = Math.max(maxBLength, 5);
+		maxKBLength = Math.max(maxKBLength, 5);
+
+		// 组装文件内容
+		StringBuilder history = new StringBuilder();
+		history.append("| ").append(this.buildStr(maxNumberLength - 3, ' ')).append("No. ")
+				.append("| File Name").append(this.buildStr(maxNameLength - 9, ' ')).append(" ")
+				.append("|        Time         ")
+				.append("| ").append(this.buildStr(maxBLength - 5, ' ')).append("Size(B) ")
+				.append("| ").append(this.buildStr(maxKBLength - 5, ' ')).append("Size(KB) |")
+				.append(IOUtils.LINE_SEPARATOR)
+				.append("|-").append(this.buildStr(maxNumberLength, '-')).append(":") // 序号
+				.append("|:").append(this.buildStr(maxNameLength, '-')).append("-") // JAR文件名
+				.append("|:-------------------:") // 创建时间
+				.append("|-").append(this.buildStr(maxBLength + 2, '-')).append(":") // 文件大小（B）
+				.append("|-").append(this.buildStr(maxKBLength + 3, '-')).append(":|") // 文件大小（KB）
+				.append(IOUtils.LINE_SEPARATOR);
+		long totalLength = 0;
+		for (int i = 0; i < jarFiles.size(); i++) {
+			File jarFile = jarFiles.get(i);
+
+			long fileLength = jarFile.length();
+
+			history.append("| ").append(this.buildIndent(maxNumberLength, i + 1)).append(i + 1) // 序号
+					.append(SEPARATOR) // 分隔符
+					.append(jarFile.getName()).append(this.buildIndent(maxNameLength, jarFile.getName())) // 文件名
+					.append(SEPARATOR) // 分隔符
+					.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(IOUtils.getFileLastModified(jarFile))) // 文件最后修改时间
+					.append(SEPARATOR) // 分隔符
+					.append(this.buildIndent(maxBLength, fileLength)).append(fileLength).append(" B") // B
+					.append(SEPARATOR) // 分隔符
+					.append(this.buildIndent(maxKBLength, fileLength / 1024)).append(fileLength / 1024).append(" KB").append(" |") // KB
+					.append(IOUtils.LINE_SEPARATOR); // 换行
+
+			totalLength += fileLength;
+		}
+		history.insert(0, "```yaml" + IOUtils.LINE_SEPARATOR
+				+ "groupId: " + project.getGroupId() + IOUtils.LINE_SEPARATOR
+				+ "artifactId: " + project.getArtifactId() + IOUtils.LINE_SEPARATOR
+				+ "version: " + project.getVersion() + IOUtils.LINE_SEPARATOR
+				+ "```" + IOUtils.LINE_SEPARATOR
+				+ IOUtils.LINE_SEPARATOR
+				+ "**Number of libs:** `" + jarFiles.size() + "`<br>" + IOUtils.LINE_SEPARATOR
+				+ "**Size of libs:** `" + totalLength + " B`  |  `" + (totalLength / 1024) + " KB`  |  `" + (totalLength / 1024 / 1024) + " MB`<br>" + IOUtils.LINE_SEPARATOR
+				+ IOUtils.LINE_SEPARATOR);
+		String newHistoryTxt = history.toString().trim();
+
+		// 读取现有的文件内容并与新的文件内容作比较，如果不一样，则提示警告，告知开发或运维人员需要更新外置lib了
+		File historyFile = new File(this.outputDirectory, libDirName + ".history.md");
+		String historyTxt = IOUtils.getFileTxt(historyFile);
+		if (historyTxt != null) { // 为null时，文件不存在，说明是第一次生成
+			historyTxt = historyTxt.trim();
+			if (!historyTxt.equals(newHistoryTxt)) {
+				this.warn("'%s/' 目录中的JAR文件已变更，请自行检查历史文件 '%s/%s.history.md' 中的变化！", libDirName, this.outputDirectory.getName(), libDirName);
+			}
+		}
+
+		IOUtils.createFile(historyFile, newHistoryTxt);
+	}
+
 	private boolean isCommonJar(Artifact artifact, Set<String> commonDependencyPatternSet) {
 		for (String commonArtifactPattern : commonDependencyPatternSet) {
 			if (MatchUtils.match(commonArtifactPattern, artifact.getGroupId() + ":" + artifact.getArtifactId())) {
@@ -413,23 +435,20 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 	private String buildIndent(int maxNameLength, String name) {
 		int diff = maxNameLength - name.length();
-
-		StringBuilder sb = new StringBuilder();
-		while (diff > 0) {
-			diff--;
-			sb.append(" ");
-		}
-
-		return sb.toString();
+		return buildStr(diff, ' ');
 	}
 
 	private String buildIndent(int maxSizeLength, long size) {
 		int diff = maxSizeLength - String.valueOf(size).length();
 
+		return buildStr(diff, ' ');
+	}
+
+	private String buildStr(int length, char c) {
 		StringBuilder sb = new StringBuilder();
-		while (diff > 0) {
-			diff--;
-			sb.append(" ");
+		while (length > 0) {
+			length--;
+			sb.append(c);
 		}
 
 		return sb.toString();
