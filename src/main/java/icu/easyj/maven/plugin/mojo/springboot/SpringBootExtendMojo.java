@@ -348,7 +348,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 				history.append(this.buildIndent(maxNumberLength, i + 1)).append(i + 1) // 序号
 						.append(SEPARATOR) // 分隔符
-						.append(jarFile.getName()).append(this.buildTab(maxNameLength, jarFile.getName())) // 文件名
+						.append(jarFile.getName()).append(this.buildIndent(maxNameLength, jarFile.getName())) // 文件名
 						.append(SEPARATOR) // 分隔符
 						.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(IOUtils.getFileLastModified(jarFile))) // 文件最后修改时间
 						.append(SEPARATOR) // 分隔符
@@ -407,13 +407,13 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		return false;
 	}
 
-	private String buildTab(int maxNameLength, String name) {
+	private String buildIndent(int maxNameLength, String name) {
 		int diff = maxNameLength - name.length();
 
 		StringBuilder sb = new StringBuilder();
 		while (diff > 0) {
-			diff -= 4;
-			sb.append("\t");
+			diff--;
+			sb.append(" ");
 		}
 
 		return sb.toString();
