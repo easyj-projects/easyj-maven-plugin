@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Scanner;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -55,6 +56,24 @@ public abstract class IOUtils {
 			return sb.toString();
 		} catch (FileNotFoundException e) {
 			return null;
+		}
+	}
+
+	/**
+	 * 读取流文本内容
+	 *
+	 * @param is 输入流
+	 * @return txt 文本内容
+	 */
+	public static String getInputStreamTxt(InputStream is) {
+		try (Scanner sc = new Scanner(is)) {
+			StringBuilder sb = new StringBuilder();
+
+			while (sc.hasNextLine()) {
+				sb.append(sc.nextLine()).append(LINE_SEPARATOR);
+			}
+
+			return sb.toString();
 		}
 	}
 

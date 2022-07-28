@@ -40,6 +40,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import static icu.easyj.maven.plugin.mojo.utils.IOUtils.LINE_SEPARATOR;
+
 /**
  * spring-boot插件的协助插件
  *
@@ -351,6 +353,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		int maxNameLength = 0;
 		int maxBLength = 0;
 		int maxKBLength = 0;
+		long totalLength = 0;
 		for (File jarFile : jarFiles) {
 			if (maxNameLength < jarFile.getName().length()) {
 				maxNameLength = jarFile.getName().length();
@@ -361,6 +364,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 			if (maxKBLength < String.valueOf(jarFile.length() / 1024).length()) {
 				maxKBLength = String.valueOf(jarFile.length() / 1024).length();
 			}
+			totalLength += jarFile.length();
 		}
 		maxNumberLength = Math.max(maxNumberLength, 3);
 		maxNameLength = Math.max(maxNameLength, 9);
@@ -369,24 +373,47 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 		// 组装文件内容
 		StringBuilder history = new StringBuilder();
+		// 文件来源说明与创建时间
+		history.append("```yaml").append(LINE_SEPARATOR)
+				.append("Created-By: icu.easyj.maven.plugins:easyj-maven-plugin:spring-boot-extend").append(LINE_SEPARATOR)
+				.append("Created-On: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(System.currentTimeMillis())).append(LINE_SEPARATOR)
+				.append("```").append(LINE_SEPARATOR)
+				.append(LINE_SEPARATOR);
+		// 项目信息：groupId、artifactId、version
+		history.append("```yaml").append(LINE_SEPARATOR)
+				.append("groupId: ").append(project.getGroupId()).append(LINE_SEPARATOR)
+				.append("artifactId: ").append(project.getArtifactId()).append(LINE_SEPARATOR)
+				.append("version: ").append(project.getVersion()).append(LINE_SEPARATOR)
+				.append("```").append(LINE_SEPARATOR)
+				.append(LINE_SEPARATOR);
+		// lib信息
+		history.append("```yaml").append(LINE_SEPARATOR);
+		// libs总数量
+		history.append("Number of libs: ").append(jarFiles.size()).append(LINE_SEPARATOR);
+		// libs总大小：分三个单位展示（B、KB、MB）
+		history.append("Size of libs: ")
+				.append(totalLength).append(" B | ")
+				.append(totalLength / 1024).append(" KB | ")
+				.append(totalLength / 1024 / 1024).append(" MB").append(LINE_SEPARATOR);
+		history.append("```").append(LINE_SEPARATOR)
+				.append(LINE_SEPARATOR);
+		// 表头
 		history.append("| ").append(this.buildStr(maxNumberLength - 3, ' ')).append("No. ")
 				.append("| File Name").append(this.buildStr(maxNameLength - 9, ' ')).append(" ")
 				.append("|        Time         ")
 				.append("| ").append(this.buildStr(maxBLength - 5, ' ')).append("Size(B) ")
 				.append("| ").append(this.buildStr(maxKBLength - 5, ' ')).append("Size(KB) |")
-				.append(IOUtils.LINE_SEPARATOR)
+				.append(LINE_SEPARATOR)
 				.append("|-").append(this.buildStr(maxNumberLength, '-')).append(":") // 序号
 				.append("|:").append(this.buildStr(maxNameLength, '-')).append("-") // JAR文件名
 				.append("|:-------------------:") // 创建时间
 				.append("|-").append(this.buildStr(maxBLength + 2, '-')).append(":") // 文件大小（B）
 				.append("|-").append(this.buildStr(maxKBLength + 3, '-')).append(":|") // 文件大小（KB）
-				.append(IOUtils.LINE_SEPARATOR);
-		long totalLength = 0;
+				.append(LINE_SEPARATOR);
+		// 表内容
 		for (int i = 0; i < jarFiles.size(); i++) {
 			File jarFile = jarFiles.get(i);
-
 			long fileLength = jarFile.length();
-
 			history.append("| ").append(this.buildIndent(maxNumberLength, i + 1)).append(i + 1) // 序号
 					.append(SEPARATOR) // 分隔符
 					.append(jarFile.getName()).append(this.buildIndent(maxNameLength, jarFile.getName())) // 文件名
@@ -396,19 +423,8 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 					.append(this.buildIndent(maxBLength, fileLength)).append(fileLength).append(" B") // B
 					.append(SEPARATOR) // 分隔符
 					.append(this.buildIndent(maxKBLength, fileLength / 1024)).append(fileLength / 1024).append(" KB").append(" |") // KB
-					.append(IOUtils.LINE_SEPARATOR); // 换行
-
-			totalLength += fileLength;
+					.append(LINE_SEPARATOR); // 换行
 		}
-		history.insert(0, "```yaml" + IOUtils.LINE_SEPARATOR
-				+ "groupId: " + project.getGroupId() + IOUtils.LINE_SEPARATOR
-				+ "artifactId: " + project.getArtifactId() + IOUtils.LINE_SEPARATOR
-				+ "version: " + project.getVersion() + IOUtils.LINE_SEPARATOR
-				+ "```" + IOUtils.LINE_SEPARATOR
-				+ IOUtils.LINE_SEPARATOR
-				+ "**Number of libs:** `" + jarFiles.size() + "`<br>" + IOUtils.LINE_SEPARATOR
-				+ "**Size of libs:** `" + totalLength + " B`  |  `" + (totalLength / 1024) + " KB`  |  `" + (totalLength / 1024 / 1024) + " MB`<br>" + IOUtils.LINE_SEPARATOR
-				+ IOUtils.LINE_SEPARATOR);
 		String newHistoryTxt = history.toString().trim();
 
 		// 读取现有的文件内容并与新的文件内容作比较，如果不一样，则提示警告，告知开发或运维人员需要更新外置lib了
@@ -416,12 +432,13 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		String historyTxt = IOUtils.getFileTxt(historyFile);
 		if (historyTxt != null) { // 为null时，文件不存在，说明是第一次生成
 			historyTxt = historyTxt.trim();
-			if (!historyTxt.equals(newHistoryTxt)) {
+			if (!getLibHistoryTableTxt(historyTxt).equals(getLibHistoryTableTxt(newHistoryTxt))) {
 				this.warn("'%s/' 目录中的JAR文件已变更，请自行检查历史文件 '%s/%s.history.md' 中的变化！", libDirName, this.outputDirectory.getName(), libDirName);
+				IOUtils.createFile(historyFile, newHistoryTxt);
 			}
+		} else {
+			IOUtils.createFile(historyFile, newHistoryTxt);
 		}
-
-		IOUtils.createFile(historyFile, newHistoryTxt);
 	}
 
 	private boolean isCommonJar(Artifact artifact, Set<String> commonDependencyPatternSet) {
@@ -452,6 +469,19 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		}
 
 		return sb.toString();
+	}
+
+	/**
+	 * 获取lib历史信息主要内容
+	 *
+	 * @param libHistoryTxt lib历史信息
+	 * @return 主要历史信息
+	 */
+	String getLibHistoryTableTxt(String libHistoryTxt) {
+		libHistoryTxt = libHistoryTxt
+				.replaceAll("[ \t\r]+", "") // 去除所有空格
+				.replaceAll("[:\\-]+(?=\\|)", ""); // 去除表头的
+		return libHistoryTxt.substring(libHistoryTxt.indexOf("||||||") + 7); // 获取表格内容
 	}
 
 	//endregion
