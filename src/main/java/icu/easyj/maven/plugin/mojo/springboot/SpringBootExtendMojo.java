@@ -377,6 +377,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		history.append("```yaml").append(LINE_SEPARATOR)
 				.append("Created-By: icu.easyj.maven.plugins:easyj-maven-plugin:spring-boot-extend").append(LINE_SEPARATOR)
 				.append("Created-On: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(System.currentTimeMillis())).append(LINE_SEPARATOR)
+				.append("Tips: Please push this file to the VCS(Version Control System), it can be used to compare future changes to libs.").append(LINE_SEPARATOR)
 				.append("```").append(LINE_SEPARATOR)
 				.append(LINE_SEPARATOR);
 		// 项目信息：groupId、artifactId、version
