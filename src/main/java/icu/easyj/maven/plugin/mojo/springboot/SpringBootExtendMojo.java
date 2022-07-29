@@ -248,8 +248,8 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 		//region lib 和 lib-common，根据 commonDependencyPatterns 配置，分开来
 
-		List<File> jarFiles = new ArrayList<>();
-		List<File> commonJarFiles = new ArrayList<>();
+		List<Artifact> jarArtifacts = new ArrayList<>();
+		List<Artifact> commonJarArtifacts = new ArrayList<>();
 
 		Set<String> commonDependencyPatternSet = StringUtils.toSet(this.commonDependencyPatterns);
 		if (ObjectUtils.isNotEmpty(this.commonDependencyPatternSet)) {
@@ -263,9 +263,9 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		// 从 artifact 中获取 file
 		for (Artifact excludeArtifact : excludeArtifacts) {
 			if (this.isCommonJar(excludeArtifact, commonDependencyPatternSet)) {
-				commonJarFiles.add(excludeArtifact.getFile());
+				commonJarArtifacts.add(excludeArtifact);
 			} else {
-				jarFiles.add(excludeArtifact.getFile());
+				jarArtifacts.add(excludeArtifact);
 			}
 		}
 
@@ -276,14 +276,14 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		this.info("  Total: %d JARs", total);
 		this.info("Include: %s JARs", StringUtils.padLeft(includeCount.get(), String.valueOf(total).length()));
 		this.info("Exclude: %s JARs（lib: %d, lib-common: %d）",
-				StringUtils.padLeft(excludeArtifacts.size(), String.valueOf(total).length()), jarFiles.size(), commonJarFiles.size());
+				StringUtils.padLeft(excludeArtifacts.size(), String.valueOf(total).length()), jarArtifacts.size(), commonJarArtifacts.size());
 
 		String loaderPath = "";
 
-		if (this.createLibDirAndZip("lib", jarFiles)) {
+		if (this.createLibDirAndZip("lib", jarArtifacts)) {
 			loaderPath = "lib/";
 		}
-		if (this.createLibDirAndZip("lib-common", commonJarFiles)) {
+		if (this.createLibDirAndZip("lib-common", commonJarArtifacts)) {
 			if (loaderPath.length() > 0) loaderPath += ", ";
 			loaderPath += "lib-common/";
 		}
@@ -306,8 +306,8 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		return StringUtils.toTreeSet(includeGroupIdsStr);
 	}
 
-	private boolean createLibDirAndZip(String libDirName, List<File> jarFiles) throws IOException {
-		if (jarFiles.isEmpty()) {
+	private boolean createLibDirAndZip(String libDirName, List<Artifact> jarArtifacts) throws IOException {
+		if (jarArtifacts.isEmpty()) {
 			return false;
 		}
 
@@ -316,47 +316,62 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 		// 将依赖复制到lib目录下
 		this.emptyLine();
-		this.info("Copy %d JARs to the directory: %s", jarFiles.size(), libDir.getPath());
-		this.copyFilesToDir(jarFiles, libDir);
+		this.info("Copy %d JARs to the directory: %s", jarArtifacts.size(), libDir.getPath());
+		this.copyFilesToDir2(jarArtifacts, libDir);
 
 		// 生成lib-history.text
 		if (this.createLibHistory) {
-			this.createLibHistoryFile(libDirName, jarFiles);
+			this.createLibHistoryFile(libDirName, jarArtifacts);
 		}
 
 		// 将依赖打包进lib.zip中
 		if (zipLib) {
 			FileOutputStream fos;
 			try {
-				fos = new FileOutputStream(outputDirectory.getPath() + "\\target\\" + libDirName + "---" + jarFiles.size() + "-JARs.zip");
+				fos = new FileOutputStream(outputDirectory.getPath() + "\\target\\" + libDirName + "---" + jarArtifacts.size() + "-JARs.zip");
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException("New FileOutputStream of '" + libDirName + ".zip' failed.", e);
 			}
 
 			try {
-				ZipUtils.toZip(jarFiles, fos, false, libDirName);
+				ZipUtils.toZip3(jarArtifacts, fos, false, libDirName);
 			} catch (IOException e) {
 				throw new RuntimeException("Package '" + libDirName + ".zip' failed.", e);
 			}
 
-			this.info("Package '%s.zip' succeeded, contains %d JARs.", libDirName, jarFiles.size());
+			this.info("Package '%s.zip' succeeded, contains %d JARs.", libDirName, jarArtifacts.size());
 		}
 
 		return true;
 	}
 
-	private void createLibHistoryFile(String libDirName, List<File> jarFiles) throws IOException {
-		jarFiles.sort(Comparator.comparing(f -> f.getName().toLowerCase()));
+	private void createLibHistoryFile(String libDirName, List<Artifact> jarArtifacts) throws IOException {
+		// 根据 文件名 排序
+		jarArtifacts.sort(Comparator.comparing(a -> a.getFile().getName().toLowerCase()));
+		// 根据 组名+文件名 排序
+		/*jarArtifacts.sort((a, b) -> {
+			int ret = a.getGroupId().toLowerCase().compareTo(b.getGroupId().toLowerCase());
+			if (ret != 0) {
+				return ret;
+			} else {
+				return a.getFile().getName().toLowerCase().compareTo(b.getFile().getName().toLowerCase());
+			}
+		});*/
 
-		// 获取最长文件名的长度
-		int maxNumberLength = String.valueOf(jarFiles.size()).length();
+		// 获取各各最大长度
+		int maxNumberLength = String.valueOf(jarArtifacts.size()).length();
 		int maxNameLength = 0;
+		int maxGroupIdLength = 0;
 		int maxBLength = 0;
 		int maxKBLength = 0;
 		long totalLength = 0;
-		for (File jarFile : jarFiles) {
+		for (Artifact jarArtifact : jarArtifacts) {
+			File jarFile = jarArtifact.getFile();
 			if (maxNameLength < jarFile.getName().length()) {
 				maxNameLength = jarFile.getName().length();
+			}
+			if (maxGroupIdLength < jarArtifact.getGroupId().length()) {
+				maxGroupIdLength = jarArtifact.getGroupId().length();
 			}
 			if (maxBLength < String.valueOf(jarFile.length()).length()) {
 				maxBLength = String.valueOf(jarFile.length()).length();
@@ -368,6 +383,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		}
 		maxNumberLength = Math.max(maxNumberLength, 3);
 		maxNameLength = Math.max(maxNameLength, 9);
+		maxGroupIdLength = Math.max(maxGroupIdLength, 8);
 		maxBLength = Math.max(maxBLength, 5);
 		maxKBLength = Math.max(maxKBLength, 5);
 
@@ -375,7 +391,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		StringBuilder history = new StringBuilder();
 		// 文件来源说明与创建时间
 		history.append("```yaml").append(LINE_SEPARATOR)
-				.append("Created-By: icu.easyj.maven.plugins:easyj-maven-plugin:spring-boot-extend").append(LINE_SEPARATOR)
+				.append("Created-By: icu.easyj.maven.plugins:easyj-maven-plugin:1.0.7(goal:spring-boot-extend)").append(LINE_SEPARATOR)
 				.append("Created-On: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(System.currentTimeMillis())).append(LINE_SEPARATOR)
 				.append("Tips: Please push this file to the VCS(Version Control System), it can be used to compare future changes to libs.").append(LINE_SEPARATOR)
 				.append("```").append(LINE_SEPARATOR)
@@ -390,7 +406,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		// lib信息
 		history.append("```yaml").append(LINE_SEPARATOR);
 		// libs总数量
-		history.append("Number of libs: ").append(jarFiles.size()).append(LINE_SEPARATOR);
+		history.append("Number of libs: ").append(jarArtifacts.size()).append(LINE_SEPARATOR);
 		// libs总大小：分三个单位展示（B、KB、MB）
 		history.append("Size of libs: ")
 				.append(totalLength).append(" B | ")
@@ -401,23 +417,27 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		// 表头
 		history.append("| ").append(this.buildStr(maxNumberLength - 3, ' ')).append("No. ")
 				.append("| File Name").append(this.buildStr(maxNameLength - 9, ' ')).append(" ")
+				.append("| Group ID").append(this.buildStr(maxGroupIdLength - 8, ' ')).append(" ")
 				.append("|        Time         ")
 				.append("| ").append(this.buildStr(maxBLength - 5, ' ')).append("Size(B) ")
 				.append("| ").append(this.buildStr(maxKBLength - 5, ' ')).append("Size(KB) |")
 				.append(LINE_SEPARATOR)
 				.append("|-").append(this.buildStr(maxNumberLength, '-')).append(":") // 序号
 				.append("|:").append(this.buildStr(maxNameLength, '-')).append("-") // JAR文件名
+				.append("|:").append(this.buildStr(maxGroupIdLength, '-')).append("-") // 所属组ID
 				.append("|:-------------------:") // 创建时间
 				.append("|-").append(this.buildStr(maxBLength + 2, '-')).append(":") // 文件大小（B）
 				.append("|-").append(this.buildStr(maxKBLength + 3, '-')).append(":|") // 文件大小（KB）
 				.append(LINE_SEPARATOR);
 		// 表内容
-		for (int i = 0; i < jarFiles.size(); i++) {
-			File jarFile = jarFiles.get(i);
+		for (int i = 0; i < jarArtifacts.size(); i++) {
+			File jarFile = jarArtifacts.get(i).getFile();
 			long fileLength = jarFile.length();
 			history.append("| ").append(this.buildIndent(maxNumberLength, i + 1)).append(i + 1) // 序号
 					.append(SEPARATOR) // 分隔符
-					.append(jarFile.getName()).append(this.buildIndent(maxNameLength, jarFile.getName())) // 文件名
+					.append(jarFile.getName()).append(this.buildIndent(maxNameLength, jarFile.getName())) // JAR文件名
+					.append(SEPARATOR) // 分隔符
+					.append(jarArtifacts.get(i).getGroupId()).append(this.buildIndent(maxGroupIdLength, jarArtifacts.get(i).getGroupId())) // 所属组ID
 					.append(SEPARATOR) // 分隔符
 					.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(IOUtils.getFileLastModified(jarFile))) // 文件最后修改时间
 					.append(SEPARATOR) // 分隔符

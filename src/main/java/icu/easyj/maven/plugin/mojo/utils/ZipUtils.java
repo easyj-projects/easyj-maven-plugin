@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.maven.artifact.Artifact;
+
 /**
  * ZIP压缩工具类
  *
@@ -64,6 +66,23 @@ public abstract class ZipUtils {
 		try (ZipOutputStream zos = new ZipOutputStream(out)) {
 			for (File srcFile : srcFiles) {
 				compress(srcFile, zos, srcFile.getName(), keepDirStructure, handlePathInZip(pathInZip));
+			}
+		}
+	}
+
+	/**
+	 * 压缩成ZIP 方法3
+	 *
+	 * @param srcArtifacts     需要压缩的构件列表
+	 * @param out              压缩文件输出流
+	 * @param keepDirStructure 是否保留原来的目录结构
+	 * @param pathInZip        当 keepDirStructure = false时，所有文件在压缩包中存放的目录名
+	 * @throws IOException 压缩失败会抛出运行时异常
+	 */
+	public static void toZip3(List<Artifact> srcArtifacts, OutputStream out, boolean keepDirStructure, String pathInZip) throws IOException {
+		try (ZipOutputStream zos = new ZipOutputStream(out)) {
+			for (Artifact srcArtifact : srcArtifacts) {
+				compress(srcArtifact.getFile(), zos, srcArtifact.getFile().getName(), keepDirStructure, handlePathInZip(pathInZip));
 			}
 		}
 	}

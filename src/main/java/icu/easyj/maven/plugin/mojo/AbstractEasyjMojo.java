@@ -294,5 +294,15 @@ public abstract class AbstractEasyjMojo extends AbstractMojo {
 		this.copyFilesToDir(sourceFiles, targetDir, false);
 	}
 
+	protected void copyFilesToDir2(Collection<Artifact> sourceArtifacts, File targetDir, boolean needLog) {
+		for (Artifact sourceArtifact : sourceArtifacts) {
+			this.copyFileToDir(sourceArtifact.getFile(), targetDir, needLog);
+		}
+	}
+
+	protected void copyFilesToDir2(Collection<Artifact> sourceArtifacts, File targetDir) {
+		this.copyFilesToDir2(sourceArtifacts, targetDir, false);
+	}
+
 	//endregion
 }
