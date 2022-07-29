@@ -17,6 +17,16 @@
 	<name>${project.groupId} :: ${project.artifactId}</name>
 	<description>EasyJ开发的Maven插件，包含：简化POM功能、SpringBoot扩展、SpringBoot辅助发布等功能</description>
 
+	<properties>
+		<revision>1.0.7-SNAPSHOT</revision>
+
+		<maven.version>3.8.6</maven.version>
+		<mavenAnnotationsVersion>3.6.4</mavenAnnotationsVersion>
+
+		<junit.version>5.8.2</junit.version>
+		<jsr305.version>3.0.2</jsr305.version>
+	</properties>
+
 	<url>https://easyj.icu</url>
 
 	<scm>
@@ -29,14 +39,6 @@
 		<system>github</system>
 		<url>https://github.com/easyj-projects/easyj-maven-plugin/issues</url>
 	</issueManagement>
-
-	<properties>
-		<maven.version>3.8.6</maven.version>
-		<mavenAnnotationsVersion>3.6.4</mavenAnnotationsVersion>
-
-		<junit.version>5.8.2</junit.version>
-		<jsr305.version>3.0.2</jsr305.version>
-	</properties>
 
 	<dependencies>
 		<dependency>
