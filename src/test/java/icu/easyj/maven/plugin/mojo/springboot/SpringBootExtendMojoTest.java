@@ -15,6 +15,8 @@
  */
 package icu.easyj.maven.plugin.mojo.springboot;
 
+import java.util.Date;
+
 import icu.easyj.maven.plugin.mojo.utils.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,14 +28,23 @@ import org.junit.jupiter.api.Test;
  */
 public class SpringBootExtendMojoTest {
 
+	private static final SpringBootExtendMojo mojo = new SpringBootExtendMojo();
+
 	@Test
-	public void test() {
+	public void testGetLibHistoryTableTxt() {
 		String libHistoryTxt = IOUtils.getInputStreamTxt(this.getClass().getResourceAsStream("/origin_lib.history.md"));
 		String tableTxt = IOUtils.getInputStreamTxt(this.getClass().getResourceAsStream("/table_lib.history.md"));
 
-		SpringBootExtendMojo mojo = new SpringBootExtendMojo();
 		String tableTxt2 = mojo.getLibHistoryTableTxt(libHistoryTxt);
 
 		Assertions.assertEquals(tableTxt.trim(), tableTxt2);
+	}
+
+	@Test
+	public void testReadLibHistoryFileCreatedOn() {
+		String libHistoryTxt = IOUtils.getInputStreamTxt(this.getClass().getResourceAsStream("/origin_lib.history.md"));
+		String timeStr = mojo.readLibHistoryFileCreatedOn(libHistoryTxt);
+
+		Assertions.assertEquals("2022-07-29 15:35:15.057", timeStr);
 	}
 }

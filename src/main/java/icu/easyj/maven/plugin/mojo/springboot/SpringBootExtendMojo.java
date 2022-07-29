@@ -526,7 +526,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	}
 
 	@Nullable
-	Date readLibHistoryFileCreatedOn(String historyTxt) {
+	String readLibHistoryFileCreatedOn(String historyTxt) {
 		int idx = historyTxt.indexOf("Created-On:");
 		if (idx < 0) {
 			return null;
@@ -537,16 +537,24 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 			return null;
 		}
 
-		historyTxt = historyTxt.substring(0, 23);
+		return historyTxt.substring(0, 23);
+	}
+
+	@Nullable
+	Date readLibHistoryFileCreatedTime(String historyTxt) {
+		String timeStr = this.readLibHistoryFileCreatedOn(historyTxt);
+		if (timeStr == null) {
+			return null;
+		}
 		try {
-			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(historyTxt);
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(timeStr);
 		} catch (ParseException ignore) {
 			return null;
 		}
 	}
 
 	void updateLibHistoryFileLastModified(File libHistoryFile, String libHistoryTxt) {
-		Date historyFileCreatedTime = readLibHistoryFileCreatedOn(libHistoryTxt);
+		Date historyFileCreatedTime = readLibHistoryFileCreatedTime(libHistoryTxt);
 		if (historyFileCreatedTime != null) {
 			libHistoryFile.setLastModified(historyFileCreatedTime.getTime());
 		}
