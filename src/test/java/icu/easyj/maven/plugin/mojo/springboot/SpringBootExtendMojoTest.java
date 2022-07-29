@@ -34,6 +34,6 @@ public class SpringBootExtendMojoTest {
 		SpringBootExtendMojo mojo = new SpringBootExtendMojo();
 		String tableTxt2 = mojo.getLibHistoryTableTxt(libHistoryTxt);
 
-		Assertions.assertEquals(tableTxt, tableTxt2);
+		Assertions.assertEquals(tableTxt.trim(), tableTxt2);
 	}
 }

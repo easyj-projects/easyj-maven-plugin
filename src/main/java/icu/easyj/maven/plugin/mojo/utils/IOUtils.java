@@ -70,7 +70,10 @@ public abstract class IOUtils {
 			StringBuilder sb = new StringBuilder();
 
 			while (sc.hasNextLine()) {
-				sb.append(sc.nextLine()).append(LINE_SEPARATOR);
+				if (sb.length() > 0) {
+					sb.append(LINE_SEPARATOR);
+				}
+				sb.append(sc.nextLine());
 			}
 
 			return sb.toString();

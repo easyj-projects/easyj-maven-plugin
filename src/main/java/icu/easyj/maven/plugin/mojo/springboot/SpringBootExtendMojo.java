@@ -501,8 +501,9 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	String getLibHistoryTableTxt(String libHistoryTxt) {
 		libHistoryTxt = libHistoryTxt
 				.replaceAll("[ \t\r]+", "") // 去除所有空格
-				.replaceAll("[:\\-]+(?=\\|)", ""); // 去除表头的
-		return libHistoryTxt.substring(libHistoryTxt.indexOf("||||||") + 7); // 获取表格内容
+				.replaceAll("[:\\-]+(?=\\|)", "") // 去除表头的
+				.replaceAll("\\|{5,}", "||||"); // 把表头和表内容的分隔行的符号替换成4个，方便substring，避免上面内容改了造成BUG。
+		return libHistoryTxt.substring(libHistoryTxt.indexOf("||||") + 5).trim(); // 获取表格内容
 	}
 
 	//endregion
