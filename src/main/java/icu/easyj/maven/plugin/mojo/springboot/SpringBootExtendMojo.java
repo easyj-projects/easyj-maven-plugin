@@ -19,9 +19,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -452,13 +454,31 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		File historyFile = new File(this.outputDirectory, libDirName + ".history.md");
 		String historyTxt = IOUtils.getFileTxt(historyFile);
 		if (historyTxt != null) { // 为null时，文件不存在，说明是第一次生成
-			historyTxt = historyTxt.trim();
 			if (!getLibHistoryTableTxt(historyTxt).equals(getLibHistoryTableTxt(newHistoryTxt))) {
-				this.warn("'%s/' 目录中的JAR文件已变更，请自行检查历史文件 '%s/%s.history.md' 中的变化！", libDirName, this.outputDirectory.getName(), libDirName);
+				// 打印 WARNING 日志
+				this.warn("'%s/' 目录中的JAR文件已变更，请检查 '%s/%s.history.md' 文件中已变更的JAR，并务必与应用一起更新，避免应用运行异常！(%s)",
+						libDirName, this.outputDirectory.getName(), libDirName,
+						new SimpleDateFormat("HH:mm:ss.SSS").format(new Date())); // 后面加个时间，避免IDE不提示WARN警告。
+
+				// 将原文件重命名为 *.bak 文件，并设为可写
+				File historyFileBak = new File(this.outputDirectory, libDirName + ".history.md.bak");
+				int i = 1;
+				while (historyFileBak.exists()) {
+					historyFileBak.setWritable(true);
+					historyFileBak = new File(this.outputDirectory, libDirName + ".history.md(" + i + ").bak");
+					i++;
+				}
+				historyFile.renameTo(historyFileBak);
+				this.updateLibHistoryFileLastModified(historyFileBak, historyTxt);
+
+				// 创建新文件，并设为只读
+				historyFile.setWritable(true);
 				IOUtils.createFile(historyFile, newHistoryTxt);
+				historyFile.setReadOnly();
 			}
 		} else {
 			IOUtils.createFile(historyFile, newHistoryTxt);
+			historyFile.setReadOnly();
 		}
 	}
 
@@ -504,6 +524,33 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 				.replaceAll("[:\\-]+(?=\\|)", "") // 去除表头的
 				.replaceAll("\\|{5,}", "||||"); // 把表头和表内容的分隔行的符号替换成4个，方便substring，避免上面内容改了造成BUG。
 		return libHistoryTxt.substring(libHistoryTxt.indexOf("||||") + 5).trim(); // 获取表格内容
+	}
+
+	@Nullable
+	Date readLibHistoryFileCreatedOn(String historyTxt) {
+		int idx = historyTxt.indexOf("Created-On:");
+		if (idx < 0) {
+			return null;
+		}
+
+		historyTxt = historyTxt.substring(idx + 11).trim();
+		if (historyTxt.length() < 23) {
+			return null;
+		}
+
+		historyTxt = historyTxt.substring(0, 23);
+		try {
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(historyTxt);
+		} catch (ParseException ignore) {
+			return null;
+		}
+	}
+
+	void updateLibHistoryFileLastModified(File libHistoryFile, String libHistoryTxt) {
+		Date historyFileCreatedTime = readLibHistoryFileCreatedOn(libHistoryTxt);
+		if (historyFileCreatedTime != null) {
+			libHistoryFile.setLastModified(historyFileCreatedTime.getTime());
+		}
 	}
 
 	//endregion
