@@ -474,12 +474,11 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 				// 创建新文件，并设为只读
 				historyFile.setWritable(true);
 				IOUtils.createFile(historyFile, newHistoryTxt);
-				historyFile.setReadOnly();
 			}
 		} else {
 			IOUtils.createFile(historyFile, newHistoryTxt);
-			historyFile.setReadOnly();
 		}
+		historyFile.setReadOnly();
 	}
 
 	private boolean isCommonJar(Artifact artifact, Set<String> commonDependencyPatternSet) {
