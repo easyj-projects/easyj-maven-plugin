@@ -43,6 +43,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import static icu.easyj.maven.plugin.mojo.utils.IOUtils.LINE_SEPARATOR;
+import static icu.easyj.maven.plugin.mojo.utils.IOUtils.LINE_SEPARATOR2;
 
 /**
  * spring-boot插件的协助插件
@@ -122,13 +123,23 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	 */
 	@Parameter(
 			property = "maven.spring-boot-extend.startupScript",
-			defaultValue = "java -jar ^" +
-					"            {loaderPath} ^" +
-					"            -Dspring.config.location=application.yml ^" +
-					"            -Dspring.config.additional-location=application-dev.yml ^" +
-					"            {finalName}.jar"
+			defaultValue = "" +
+					"java -jar ^" + LINE_SEPARATOR2 +
+					"     -Xms128m -Xmx128m ^" + LINE_SEPARATOR2 +
+					"     {loaderPath} ^" + LINE_SEPARATOR2 +
+					"     -Dspring.profiles.active={activeProfile} ^" + LINE_SEPARATOR2 +
+					"     -Dspring.config.location=application.yml ^" + LINE_SEPARATOR2 +
+					"     -Dspring.config.additional-location=application-{activeProfile}.yml ^" + LINE_SEPARATOR2 +
+					"     {additionalStartupScript} ^" + LINE_SEPARATOR2 +
+					"     {finalName}.jar"
 	)
 	private String startupScript;
+
+	@Parameter(property = "maven.spring-boot-extend.additionalStartupScript")
+	private String additionalStartupScript;
+
+	@Parameter(property = "maven.spring-boot-extend.activeProfile", defaultValue = "profile")
+	private String activeProfile;
 
 	//endregion
 
@@ -572,21 +583,37 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 	//region 功能3：创建startup文件
 
-	private void createStartupFile(String loaderPath) {
+	private void createStartupFile(String loaderPath) throws IOException {
 		if (!needCreateStartupFile) {
 			return;
 		}
 
 		this.emptyLine();
 
-		String startupScript = this.replacePlaceholder(this.startupScript)
+		String startupScript = this.replacePlaceholder(
+						this.startupScript.replaceAll("\\s*\\{\\s*additionalStartupScript\\s*\\}", (ObjectUtils.isNotEmpty(this.additionalStartupScript) ? this.additionalStartupScript : ""))
+				)
 				.replaceAll("\\s*\\{\\s*loaderPath\\s*\\}", (ObjectUtils.isNotEmpty(loaderPath) ? " -Dloader.path=\"" + loaderPath + "\" ^" : ""))
+				.replaceAll("\\s*\\{\\s*activeProfile\\s*\\}", this.activeProfile)
 				.replaceAll("\\s*(\\^|\\<br\\s*\\/\\>)(\\s|\\^|\\<br\\s*\\/\\>)*", " ^\r\n     ");
 
+		File activeProfileFile = new File(this.outputDirectory + "/target/classes/application-" + this.activeProfile + ".yml");
+		if (!activeProfileFile.exists() || !activeProfileFile.isFile()) {
+			IOUtils.createFile(activeProfileFile, "# " + this.activeProfile + "环境" + LINE_SEPARATOR2 + LINE_SEPARATOR2);
+			activeProfileFile.mkdirs();
+		}
+
 		// 创建startup.bat文件
-		createStartupFile("bat", startupScript + "\r\n\r\ncmd\r\n");
+		createStartupFile("bat",
+				"title \"" + project.getBuild().getFinalName() + "\"" + LINE_SEPARATOR2 + LINE_SEPARATOR2
+						+ startupScript
+						+ "\r\n\r\ncmd\r\n"
+		);
 		// 创建startup.sh文件
-		createStartupFile("sh", "#!/bin/sh\r\n\r\n" + startupScript.replace('^', '\\') + "\r\n");
+		createStartupFile("sh",
+				"#!/bin/sh\r\n\r\n"
+						+ startupScript.replace('^', '\\') + "\r\n"
+		);
 	}
 
 	private void createStartupFile(String fileSuffix, String startupScriptText) {

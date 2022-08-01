@@ -37,6 +37,8 @@ public abstract class IOUtils {
 	//public static final String LINE_SEPARATOR = System.getProperty("os.name").contains("Windows") ? "\r\n" : "\n";
 	public static final String LINE_SEPARATOR = "\n";
 
+	public static final String LINE_SEPARATOR2 = "\r\n";
+
 
 	/**
 	 * 读取文本文件内容

@@ -15,8 +15,6 @@
  */
 package icu.easyj.maven.plugin.mojo.springboot;
 
-import java.util.Date;
-
 import icu.easyj.maven.plugin.mojo.utils.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
