@@ -120,7 +120,14 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	/**
 	 * spring-boot应用的startup脚本
 	 */
-	@Parameter(property = "maven.spring-boot-extend.startupScript", defaultValue = "java -jar ^ {loaderPath} ^ {finalName}.jar")
+	@Parameter(
+			property = "maven.spring-boot-extend.startupScript",
+			defaultValue = "java -jar ^" +
+					"            {loaderPath} ^" +
+					"            -Dspring.config.location=application.yml ^" +
+					"            -Dspring.config.additional-location=application-dev.yml ^" +
+					"            {finalName}.jar"
+	)
 	private String startupScript;
 
 	//endregion

@@ -38,9 +38,15 @@ import org.apache.maven.plugins.annotations.Parameter;
 public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 
 	/**
+	 * 源文件目录集合
+	 */
+	@Parameter
+	private Set<File> sourceDirectories;
+
+	/**
 	 * 需发布文件匹配串。
 	 */
-	@Parameter(property = "maven.spring-boot-release.filePatterns", defaultValue = "{finalName}.jar,lib-*.zip,startup.*")
+	@Parameter(property = "maven.spring-boot-release.filePatterns", defaultValue = "{finalName}.jar,lib-*.zip,startup.*,*.yml,*.yaml,*.properties")
 	private Set<String> filePatterns;
 
 	/**
@@ -56,35 +62,49 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 			throw new RuntimeException("'releaseDirectory' must be not empty.");
 		}
 
-		// 创建发布文件夹目录实例
+		if (this.sourceDirectories == null) {
+			this.sourceDirectories = new HashSet<>();
+		}
+
+		// release/ 文件夹实例
 		File releaseDir = this.createReleaseDir();
 
-		// 创建target文件夹实例
+		// 添加 /target/ 和 /target/classes/ 文件夹实例
 		File targetDir = this.getTargetDir();
-		if (!targetDir.exists()) {
-			throw new RuntimeException("The '/target/' directory is not exists.");
+		if (targetDir.exists() && targetDir.isDirectory()) {
+			this.sourceDirectories.add(targetDir);
+			this.info("add targetDir");
+
+			File classesDir = new File(targetDir, "classes");
+			if (classesDir.exists() && classesDir.isDirectory()) {
+				this.sourceDirectories.add(classesDir);
+				this.info("add classesDir");
+			}
 		}
 
 		// 处理匹配串
-		Set<String> patterns = this.handleFilePatterns();
+		Set<String> patterns = this.getFilePatterns();
 		this.info("The file patterns: " + patterns);
 
-		// 匹配的文件复制到发布文件夹中
-		File[] files = targetDir.listFiles();
-		if (files != null) {
-			List<File> fileList = new ArrayList<>(files.length);
 
-			for (File file : files) {
-				if (!file.isFile()) {
-					continue;
+		for (File sourceDir : this.sourceDirectories) {
+			// 匹配的文件复制到发布文件夹中
+			File[] files = sourceDir.listFiles();
+			if (files != null) {
+				List<File> fileList = new ArrayList<>(files.length);
+
+				for (File file : files) {
+					if (!file.isFile()) {
+						continue;
+					}
+
+					if (MatchUtils.match(patterns, file.getName())) {
+						fileList.add(file);
+					}
 				}
 
-				if (MatchUtils.match(patterns, file.getName())) {
-					fileList.add(file);
-				}
+				this.copyFilesToDir(fileList, releaseDir, true);
 			}
-
-			this.copyFilesToDir(fileList, releaseDir, true);
 		}
 	}
 
@@ -106,7 +126,7 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 		return releaseDir;
 	}
 
-	private Set<String> handleFilePatterns() {
+	private Set<String> getFilePatterns() {
 		Set<String> patterns = new HashSet<>();
 		for (String filePattern : this.filePatterns) {
 			if (StringUtils.isEmpty(filePattern)) {
