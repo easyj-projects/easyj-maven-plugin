@@ -82,6 +82,10 @@ public class SpringBootReleaseMojo extends AbstractSpringBootMojo {
 			}
 		}
 
+		if (this.sourceDirectories.isEmpty()) {
+			return;
+		}
+
 		// 处理匹配串
 		Set<String> patterns = this.getFilePatterns();
 		this.info("The file patterns: " + patterns);
