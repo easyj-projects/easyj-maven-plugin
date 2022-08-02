@@ -596,7 +596,8 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 				)
 				.replaceAll("\\s*\\{\\s*loaderPath\\s*\\}", (ObjectUtils.isNotEmpty(loaderPath) ? " -Dloader.path=\"" + loaderPath + "\" ^" : ""))
 				.replaceAll("\\s*\\{\\s*activeProfile\\s*\\}", this.activeProfile)
-				.replaceAll("\\s*(\\^|\\<br\\s*\\/\\>)(\\s|\\^|\\<br\\s*\\/\\>)*", " ^\r\n     ");
+				.replaceAll("\\s*(\\^|\\<br\\s*\\/\\>|\\\\)(\\s|\\^|\\<br\\s*\\/\\>|\\\\)*", " ^\r\n     ")
+				.trim();
 
 		// 如果指定环境配置文件不存在，则自动创建一个
 		File activeProfileFile = new File(this.outputDirectory + "/target/classes/application-" + this.activeProfile + ".yml");
