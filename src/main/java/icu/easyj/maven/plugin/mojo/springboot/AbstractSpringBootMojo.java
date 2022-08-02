@@ -44,7 +44,7 @@ public abstract class AbstractSpringBootMojo extends AbstractEasyjMojo {
 		try {
 			this.doExecute();
 		} catch (IOException e) {
-			throw new RuntimeException("IO exception", e);
+			throw new MojoExecutionException("IO exception", e);
 		}
 	}
 

@@ -130,13 +130,13 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 					"     -Dspring.profiles.active={activeProfile} ^" + LINE_SEPARATOR2 +
 					"     -Dspring.config.location=application.yml ^" + LINE_SEPARATOR2 +
 					"     -Dspring.config.additional-location=application-{activeProfile}.yml ^" + LINE_SEPARATOR2 +
-					"     {additionalStartupScript} ^" + LINE_SEPARATOR2 +
+					"     {startupScriptAdditionalParameter} ^" + LINE_SEPARATOR2 +
 					"     {finalName}.jar"
 	)
 	private String startupScript;
 
-	@Parameter(property = "maven.spring-boot-extend.additionalStartupScript")
-	private String additionalStartupScript;
+	@Parameter(property = "maven.spring-boot-extend.startupScriptAdditionalParameter")
+	private String startupScriptAdditionalParameter;
 
 	@Parameter(property = "maven.spring-boot-extend.activeProfile", defaultValue = "profile")
 	private String activeProfile;
@@ -590,17 +590,18 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 		this.emptyLine();
 
+		// 替换启动脚本的占位符
 		String startupScript = this.replacePlaceholder(
-						this.startupScript.replaceAll("\\s*\\{\\s*additionalStartupScript\\s*\\}", (ObjectUtils.isNotEmpty(this.additionalStartupScript) ? this.additionalStartupScript : ""))
+						this.startupScript.replaceAll("\\s*\\{\\s*startupScriptAdditionalParameter\\s*\\}", (ObjectUtils.isNotEmpty(this.startupScriptAdditionalParameter) ? this.startupScriptAdditionalParameter : ""))
 				)
 				.replaceAll("\\s*\\{\\s*loaderPath\\s*\\}", (ObjectUtils.isNotEmpty(loaderPath) ? " -Dloader.path=\"" + loaderPath + "\" ^" : ""))
 				.replaceAll("\\s*\\{\\s*activeProfile\\s*\\}", this.activeProfile)
 				.replaceAll("\\s*(\\^|\\<br\\s*\\/\\>)(\\s|\\^|\\<br\\s*\\/\\>)*", " ^\r\n     ");
 
+		// 如果指定环境配置文件不存在，则自动创建一个
 		File activeProfileFile = new File(this.outputDirectory + "/target/classes/application-" + this.activeProfile + ".yml");
 		if (!activeProfileFile.exists() || !activeProfileFile.isFile()) {
 			IOUtils.createFile(activeProfileFile, "# " + this.activeProfile + "环境" + LINE_SEPARATOR2 + LINE_SEPARATOR2);
-			activeProfileFile.mkdirs();
 		}
 
 		// 创建startup.bat文件
