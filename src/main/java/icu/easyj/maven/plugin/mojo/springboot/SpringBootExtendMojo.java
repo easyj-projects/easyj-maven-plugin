@@ -339,12 +339,12 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		this.info("Copy %d JARs to the directory: %s", jarArtifacts.size(), libDir.getPath());
 		this.copyFilesToDir2(jarArtifacts, libDir);
 
-		// 生成lib-history.text
+		// 生成lib(-common).history.md
 		if (this.createLibHistory) {
 			this.createLibHistoryFile(libDirName, jarArtifacts);
 		}
 
-		// 将依赖打包进lib.zip中
+		// 将依赖打包进lib(-common).zip中
 		if (zipLib) {
 			FileOutputStream fos;
 			try {
