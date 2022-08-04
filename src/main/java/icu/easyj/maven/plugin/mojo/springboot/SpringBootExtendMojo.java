@@ -138,7 +138,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	@Parameter(property = "maven.spring-boot-extend.startupScriptAdditionalParameter")
 	private String startupScriptAdditionalParameter;
 
-	@Parameter(property = "maven.spring-boot-extend.activeProfile", defaultValue = "profile")
+	@Parameter(property = "maven.spring-boot-extend.activeProfile", defaultValue = "prod")
 	private String activeProfile;
 
 	//endregion
