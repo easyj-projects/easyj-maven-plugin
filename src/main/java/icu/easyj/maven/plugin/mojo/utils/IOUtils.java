@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -128,7 +129,14 @@ public abstract class IOUtils {
 			// 如果是jar文件，则读取 /META-INF/MANIFEST.MF 文件的lastModified。
 			// 因为jar文件是和该文件一起生成的，所以这个文件的lastModified才是jar文件的实际最后生成时间
 			try (JarFile jarFile = new JarFile(file)) {
+				// 读取 MANIFEST.MF 文件的创建时间
 				JarEntry jarEntry = jarFile.getJarEntry(JarFile.MANIFEST_NAME);
+
+				if (jarEntry == null) {
+					// 如果 MANIFEST.MF 文件不存在，就找所有JarEntry中时间最大的那个
+					jarEntry = getMaxTimeJarEntry(jarFile);
+				}
+
 				if (jarEntry != null) {
 					return jarEntry.getTime();
 				}
@@ -138,5 +146,33 @@ public abstract class IOUtils {
 		}
 
 		return file.lastModified();
+	}
+
+//	@Nullable
+//	private static JarEntry getAnyOneClassJarEntry(JarFile jarFile) {
+//		Enumeration<JarEntry> enumeration = jarFile.entries();
+//		while (enumeration.hasMoreElements()) {
+//			JarEntry currentEntry = enumeration.nextElement();
+//			if (currentEntry.getName().endsWith(".class")) {
+//				return currentEntry;
+//			}
+//		}
+//
+//		return null;
+//	}
+
+	@Nullable
+	private static JarEntry getMaxTimeJarEntry(JarFile jarFile) {
+		JarEntry maxTimeJarEntry = null;
+
+		Enumeration<JarEntry> enumeration = jarFile.entries();
+		while (enumeration.hasMoreElements()) {
+			JarEntry currentEntry = enumeration.nextElement();
+			if (maxTimeJarEntry == null || maxTimeJarEntry.getTime() < currentEntry.getTime()) {
+				maxTimeJarEntry = currentEntry;
+			}
+		}
+
+		return maxTimeJarEntry;
 	}
 }
