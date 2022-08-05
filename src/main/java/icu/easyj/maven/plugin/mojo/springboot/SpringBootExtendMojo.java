@@ -379,7 +379,6 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		});*/
 
 		// 获取各各最大长度
-		int maxNumberLength = String.valueOf(jarArtifacts.size()).length();
 		int maxNameLength = 0;
 		int maxGroupIdLength = 0;
 		int maxBLength = 0;
@@ -401,7 +400,6 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 			}
 			totalLength += jarFile.length();
 		}
-		maxNumberLength = Math.max(maxNumberLength, 3);
 		maxNameLength = Math.max(maxNameLength, 9);
 		maxGroupIdLength = Math.max(maxGroupIdLength, 8);
 		maxBLength = Math.max(maxBLength, 5);
@@ -435,14 +433,12 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		history.append("```").append(LINE_SEPARATOR)
 				.append(LINE_SEPARATOR);
 		// 表头
-		history.append("| ").append(this.buildStr(maxNumberLength - 3, ' ')).append("No. ")
-				.append("| File Name").append(this.buildStr(maxNameLength - 9, ' ')).append(" ")
+		history.append("| File Name").append(this.buildStr(maxNameLength - 9, ' ')).append(" ")
 				.append("| Group ID").append(this.buildStr(maxGroupIdLength - 8, ' ')).append(" ")
 				.append("|        Time         ")
 				.append("| ").append(this.buildStr(maxBLength - 5, ' ')).append("Size(B) ")
 				.append("| ").append(this.buildStr(maxKBLength - 5, ' ')).append("Size(KB) |")
 				.append(LINE_SEPARATOR)
-				.append("|-").append(this.buildStr(maxNumberLength, '-')).append(":") // 序号
 				.append("|:").append(this.buildStr(maxNameLength, '-')).append("-") // JAR文件名
 				.append("|:").append(this.buildStr(maxGroupIdLength, '-')).append("-") // 所属组ID
 				.append("|:-------------------:") // 创建时间
@@ -450,14 +446,13 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 				.append("|-").append(this.buildStr(maxKBLength + 3, '-')).append(":|") // 文件大小（KB）
 				.append(LINE_SEPARATOR);
 		// 表内容
-		for (int i = 0; i < jarArtifacts.size(); i++) {
-			File jarFile = jarArtifacts.get(i).getFile();
+		for (Artifact jarArtifact : jarArtifacts) {
+			File jarFile = jarArtifact.getFile();
 			long fileLength = jarFile.length();
-			history.append("| ").append(this.buildIndent(maxNumberLength, i + 1)).append(i + 1) // 序号
-					.append(SEPARATOR) // 分隔符
+			history.append("| ") // 行首符号
 					.append(jarFile.getName()).append(this.buildIndent(maxNameLength, jarFile.getName())) // JAR文件名
 					.append(SEPARATOR) // 分隔符
-					.append(jarArtifacts.get(i).getGroupId()).append(this.buildIndent(maxGroupIdLength, jarArtifacts.get(i).getGroupId())) // 所属组ID
+					.append(jarArtifact.getGroupId()).append(this.buildIndent(maxGroupIdLength, jarArtifact.getGroupId())) // 所属组ID
 					.append(SEPARATOR) // 分隔符
 					.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(IOUtils.getFileLastModified(jarFile))) // 文件最后修改时间
 					.append(SEPARATOR) // 分隔符
