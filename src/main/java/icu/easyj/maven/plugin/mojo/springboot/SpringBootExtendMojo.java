@@ -124,8 +124,8 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	@Parameter(
 			property = "maven.spring-boot-extend.startupScript",
 			defaultValue = "" +
-					"java -jar ^" + LINE_SEPARATOR2 +
-					"     -Xms128m -Xmx128m ^" + LINE_SEPARATOR2 +
+					"java -Xms64m -Xmx128m ^" + LINE_SEPARATOR2 +
+					"     -jar ^" + LINE_SEPARATOR2 +
 					"     {loaderPath} ^" + LINE_SEPARATOR2 +
 					"     -Dspring.profiles.active={activeProfile} ^" + LINE_SEPARATOR2 +
 					"     -Dspring.config.location=application.yml ^" + LINE_SEPARATOR2 +
