@@ -435,7 +435,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		// 表头
 		history.append("| File Name").append(this.buildStr(maxNameLength - 9, ' ')).append(" ")
 				.append("| Group ID").append(this.buildStr(maxGroupIdLength - 8, ' ')).append(" ")
-				.append("|        Time         ")
+				.append("|    Last Modified    ")
 				.append("| ").append(this.buildStr(maxBLength - 5, ' ')).append("Size(B) ")
 				.append("| ").append(this.buildStr(maxKBLength - 5, ' ')).append("Size(KB) |")
 				.append(LINE_SEPARATOR)
