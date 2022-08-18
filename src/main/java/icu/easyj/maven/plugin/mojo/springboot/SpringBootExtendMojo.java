@@ -29,6 +29,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import icu.easyj.maven.plugin.mojo.utils.IOUtils;
@@ -71,6 +72,14 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	//region 功能2：includeGroupIds
 
 	/**
+	 * 是否跳过 includeGroupIds 功能
+	 *
+	 * @since 1.0.9
+	 */
+	@Parameter(property = "maven.spring-boot-extend.skipIncludeGroupIds", defaultValue = "true")
+	private boolean skipIncludeGroupIds;
+
+	/**
 	 * 由于springboot官方不提供该功能，只提供 excludeGroupIds，所以这里提供该功能
 	 */
 	@Parameter(property = "maven.spring-boot-extend.includeGroupIds")
@@ -84,6 +93,14 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	 */
 	@Parameter(property = "maven.spring-boot-extend.additionalIncludeGroupIds")
 	private String additionalIncludeGroupIds;
+
+	/**
+	 * 是否include 所有snapshot的依赖
+	 *
+	 * @since 1.0.9
+	 */
+	@Parameter(property = "maven.spring-boot-extend.includeSnapshotDependencies", defaultValue = "false")
+	private boolean includeSnapshotDependencies;
 
 	@Parameter(property = "maven.spring-boot-extend.commonDependencyPatterns")
 	private String commonDependencyPatterns;
@@ -190,6 +207,10 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	//region 功能2：includeGroupIds
 
 	private String includeDependencies() throws IOException {
+		if (this.skipIncludeGroupIds) {
+			return null;
+		}
+
 		// 获取 includeGroupIds
 		Set<String> includeGroupIds = this.getIncludeGroupIds();
 		if (ObjectUtils.isEmpty(includeGroupIds)) {
@@ -311,19 +332,40 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		return loaderPath;
 	}
 
-	@Nullable
+	@Nonnull
 	private Set<String> getIncludeGroupIds() {
 		String includeGroupIdsStr = this.includeGroupIds;
-		if (ObjectUtils.isEmpty(includeGroupIdsStr)) {
-			return null;
+		if (includeGroupIdsStr == null) {
+			includeGroupIdsStr = "";
+		} else {
+			includeGroupIdsStr = includeGroupIdsStr.trim();
 		}
 
 		if (ObjectUtils.isNotEmpty(this.additionalIncludeGroupIds)) {
-			includeGroupIdsStr += "," + this.additionalIncludeGroupIds;
+			if (includeGroupIdsStr.length() > 0 && !includeGroupIdsStr.endsWith(",")) {
+				includeGroupIdsStr += ",";
+			}
+			includeGroupIdsStr += this.additionalIncludeGroupIds;
 		}
 
 		// string 转为 set
-		return StringUtils.toTreeSet(includeGroupIdsStr);
+		Set<String> includeGroupIds = StringUtils.toTreeSet(includeGroupIdsStr);
+
+		if (this.includeSnapshotDependencies) {
+			// 设置过滤器
+			project.setArtifactFilter(artifact -> this.isRuntimeArtifact(artifact) && artifact.getVersion().endsWith("-SNAPSHOT"));
+			// 获取SNAPSHOT版本的artifacts
+			Set<Artifact> snapshotArtifacts = project.getArtifacts();
+			// 清空过滤器
+			project.setArtifactFilter(null);
+			// 获取groupIds
+			for (Artifact snapshotArtifact : snapshotArtifacts) {
+				this.info("snapshotArtifact: %s", snapshotArtifact.getArtifactId());
+				includeGroupIds.add(snapshotArtifact.getGroupId());
+			}
+		}
+
+		return includeGroupIds;
 	}
 
 	private boolean createLibDirAndZip(String libDirName, List<Artifact> jarArtifacts) throws IOException {
