@@ -76,7 +76,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	 *
 	 * @since 1.0.9
 	 */
-	@Parameter(property = "maven.spring-boot-extend.skipIncludeGroupIds", defaultValue = "true")
+	@Parameter(property = "maven.spring-boot-extend.skipIncludeGroupIds", defaultValue = "false")
 	private boolean skipIncludeGroupIds;
 
 	/**
@@ -110,6 +110,14 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	 */
 	@Parameter(property = "maven.spring-boot-extend.commonDependencyPatternSet")
 	private Set<String> commonDependencyPatternSet;
+
+	/**
+	 * 是否将scope=provided或optional=true的jar从外置lib中丢弃掉。如：lombok是需要丢弃的。
+	 *
+	 * @since 1.0.9
+	 */
+	@Parameter(property = "maven.spring-boot-extend.discardScopeProvidedAndOptionalJarFromLib", defaultValue = "true")
+	private boolean discardScopeProvidedAndOptionalJarFromLib;
 
 	/**
 	 * 是否将排除掉的lib打包进lib.zip中。
@@ -225,7 +233,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		AtomicInteger includeCount = new AtomicInteger(0);
 		// 设置过滤器
 		project.setArtifactFilter(artifact -> {
-			if (this.isRuntimeArtifact(artifact)) {
+			if (this.isNotTestArtifact(artifact)) {
 				if (!includeGroupIds.contains(artifact.getGroupId())) {
 					return true;
 				} else {
@@ -288,6 +296,13 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 
 		//region lib 和 lib-common，根据 commonDependencyPatterns 配置，分开来
+
+		// 将scope=provided、optional=true和无用的jar包丢弃掉
+		if (this.discardScopeProvidedAndOptionalJarFromLib) {
+			excludeArtifacts.removeIf(art -> isScopeProvidedOrOptional(art) || isUnnecessaryArtifact(art));
+		} else {
+			excludeArtifacts.removeIf(art -> isUnnecessaryArtifact(art));
+		}
 
 		List<Artifact> jarArtifacts = new ArrayList<>();
 		List<Artifact> commonJarArtifacts = new ArrayList<>();
@@ -353,7 +368,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 		if (this.includeSnapshotDependencies) {
 			// 设置过滤器
-			project.setArtifactFilter(artifact -> this.isRuntimeArtifact(artifact) && artifact.getVersion().endsWith("-SNAPSHOT"));
+			project.setArtifactFilter(artifact -> this.isNotTestArtifact(artifact) && artifact.getVersion().endsWith("-SNAPSHOT"));
 			// 获取SNAPSHOT版本的artifacts
 			Set<Artifact> snapshotArtifacts = project.getArtifacts();
 			// 清空过滤器

@@ -72,6 +72,23 @@ public abstract class AbstractEasyjMojo extends AbstractMojo {
 				|| "runtime".equalsIgnoreCase(scope));
 	}
 
+	protected boolean isScopeProvidedOrOptional(Artifact artifact) {
+		return artifact.isOptional() || "provided".equalsIgnoreCase(artifact.getScope());
+	}
+
+	protected boolean isTestArtifact(Artifact artifact) {
+		return "test".equalsIgnoreCase(artifact.getScope());
+	}
+
+	protected boolean isNotTestArtifact(Artifact artifact) {
+		return !isTestArtifact(artifact);
+	}
+
+	protected boolean isUnnecessaryArtifact(Artifact artifact) {
+		return artifact.getId().toLowerCase().startsWith("org.springframework.boot:spring-boot-configuration-processor:")
+				|| artifact.getId().toLowerCase().startsWith("org.projectlombok:lombok:");
+	}
+
 	//endregion
 
 
