@@ -405,7 +405,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		if (zipLib) {
 			FileOutputStream fos;
 			try {
-				fos = new FileOutputStream(outputDirectory.getPath() + "\\target\\" + libDirName + "---" + jarArtifacts.size() + "-JARs.zip");
+				fos = new FileOutputStream(outputDirectory.getPath() + "/target/" + libDirName + "---" + jarArtifacts.size() + "-JARs.zip");
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException("New FileOutputStream of '" + libDirName + ".zip' failed.", e);
 			}
@@ -541,13 +541,14 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 				historyFile.renameTo(historyFileBak);
 				this.updateLibHistoryFileLastModified(historyFileBak, historyTxt);
 
-				// 创建新文件，并设为只读
+				// 创建新文件
 				historyFile.setWritable(true);
 				IOUtils.createFile(historyFile, newHistoryTxt);
 			}
 		} else {
 			IOUtils.createFile(historyFile, newHistoryTxt);
 		}
+		// 最终设置为只读
 		historyFile.setReadOnly();
 	}
 
@@ -671,7 +672,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	}
 
 	private void createStartupFile(String fileSuffix, String startupScriptText) {
-		File file = new File(outputDirectory.getPath() + "\\target\\startup." + fileSuffix);
+		File file = new File(outputDirectory.getPath() + "/target/startup." + fileSuffix);
 		try {
 			IOUtils.createFile(file, startupScriptText);
 			this.info("Create startup file succeeded: %s, the startup script:\r\n===>\r\n%s\r\n<===\r\n",

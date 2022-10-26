@@ -142,7 +142,7 @@ public abstract class AbstractEasyjMojo extends AbstractMojo {
 	//region 创建目录实例
 
 	protected File getTargetDir() {
-		return new File(this.outputDirectory, "target\\");
+		return new File(this.outputDirectory, "target/");
 	}
 
 	protected File createTargetDir() {
@@ -160,7 +160,7 @@ public abstract class AbstractEasyjMojo extends AbstractMojo {
 	}
 
 	protected File createLibDir(String libDirName) {
-		File libDir = new File(this.outputDirectory, "target\\" + libDirName);
+		File libDir = new File(this.outputDirectory, "target/" + libDirName);
 		if (!libDir.exists()) {
 			if (!libDir.mkdirs()) {
 				throw new RuntimeException("Failed to create '" + libDir.getPath() + "' directory.");

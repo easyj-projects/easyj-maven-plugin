@@ -144,7 +144,11 @@ public abstract class ZipUtils {
 		}
 
 		if (!pathInZip.endsWith("/") && !pathInZip.endsWith("\\")) {
-			pathInZip += "\\";
+			pathInZip += "/";
+		}
+
+		if (!System.getProperty("os.name").contains("Windows")) {
+			pathInZip = pathInZip.replace('\\', '/');
 		}
 
 		return pathInZip;
