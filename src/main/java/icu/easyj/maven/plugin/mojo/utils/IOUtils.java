@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Scanner;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import javax.annotation.Nullable;
 
 /**
@@ -174,5 +176,30 @@ public abstract class IOUtils {
 		}
 
 		return maxTimeJarEntry;
+	}
+
+	public static boolean isSpringBootDependenciesStarterJar(File file) {
+		if (file.getName().endsWith(".jar")) {
+			try (JarFile jarFile = new JarFile(file)) {
+				return isSpringBootDependenciesStarterJar(jarFile);
+			} catch (IOException e) {
+				throw new RuntimeException("", e);
+			}
+		}
+		return false;
+	}
+
+	public static boolean isSpringBootDependenciesStarterJar(JarFile jarFile) throws IOException {
+		Manifest manifest = jarFile.getManifest();
+		if (manifest == null) {
+			return false;
+		}
+
+		Attributes attributes = manifest.getMainAttributes();
+		if (attributes == null) {
+			return false;
+		}
+
+		return "dependencies-starter".equalsIgnoreCase(attributes.getValue("Spring-Boot-Jar-Type"));
 	}
 }

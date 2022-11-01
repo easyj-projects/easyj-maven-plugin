@@ -112,12 +112,36 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	private Set<String> commonDependencyPatternSet;
 
 	/**
-	 * 是否将scope=provided或optional=true的jar从外置lib中丢弃掉。如：lombok是需要丢弃的。
+	 * 与 maven-dependency-plugin 插件的 includeScope 效果一致。
 	 *
-	 * @since 1.0.9
+	 * @since 1.1.0
 	 */
-	@Parameter(property = "maven.spring-boot-extend.discardScopeProvidedAndOptionalJarFromLib", defaultValue = "true")
-	private boolean discardScopeProvidedAndOptionalJarFromLib;
+	@Parameter(property = "maven.spring-boot-extend.libIncludeScope", defaultValue = Artifact.SCOPE_RUNTIME)
+	private String libIncludeScope;
+
+	/**
+	 * 与 maven-dependency-plugin 插件的 excludeScope 效果一致。
+	 *
+	 * @since 1.1.0
+	 */
+	@Parameter(property = "maven.spring-boot-extend.libExcludeScope")
+	private String libExcludeScope;
+
+	/**
+	 * 是否需要optional=true的依赖放入外置lib目录中
+	 *
+	 * @since 1.1.0
+	 */
+	@Parameter(property = "maven.spring-boot-extend.libIncludeOptional", defaultValue = "false")
+	private boolean libIncludeOptional;
+
+	/**
+	 * 是否移除 标记了 ”Spring-Boot-Jar-Type: dependencies-starter“ 的JAR
+	 *
+	 * @since 1.1.0
+	 */
+	@Parameter(property = "maven.spring-boot-extend.libExcludeDependenciesStarter", defaultValue = "true")
+	private boolean libExcludeDependenciesStarter;
 
 	/**
 	 * 是否将排除掉的lib打包进lib.zip中。
@@ -298,11 +322,11 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		//region lib 和 lib-common，根据 commonDependencyPatterns 配置，分开来
 
 		// 将scope=provided、optional=true和无用的jar包丢弃掉
-		if (this.discardScopeProvidedAndOptionalJarFromLib) {
-			excludeArtifacts.removeIf(art -> isScopeProvidedOrOptional(art) || isUnnecessaryArtifact(art));
-		} else {
-			excludeArtifacts.removeIf(art -> isUnnecessaryArtifact(art));
-		}
+		excludeArtifacts.removeIf(art ->
+				!filter(art, this.libIncludeScope, this.libExcludeScope)
+						|| isUnnecessaryArtifact(art, this.libExcludeDependenciesStarter) // 一些不需要的依赖，如：编译期起才作用的依赖
+						|| (!libIncludeOptional && art.isOptional()) // optional=true
+		);
 
 		List<Artifact> jarArtifacts = new ArrayList<>();
 		List<Artifact> commonJarArtifacts = new ArrayList<>();

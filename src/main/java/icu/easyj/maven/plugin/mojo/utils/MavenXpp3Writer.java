@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.TreeSet;
 import javax.annotation.Nullable;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.ActivationFile;
 import org.apache.maven.model.ActivationOS;
@@ -307,7 +308,7 @@ public class MavenXpp3Writer {
 		if (dependency.getClassifier() != null) {
 			this.write("classifier", dependency.getClassifier(), serializer);
 		}
-		if (dependency.getScope() != null && !dependency.getScope().equals("compile")) {
+		if (dependency.getScope() != null && !Artifact.SCOPE_COMPILE.equalsIgnoreCase(dependency.getScope())) {
 			this.write("scope", dependency.getScope(), serializer);
 		}
 		if (dependency.getSystemPath() != null) {

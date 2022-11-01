@@ -29,9 +29,20 @@ import org.junit.jupiter.api.Test;
 public class IOUtilsTest {
 
 	@Test
-	public void testGetFileLastModified() throws IOException {
+	public void testGetFileLastModified() {
 		File file = new File(this.getClass().getClassLoader().getResource("easyj.jar").getFile());
 		long lastModified = IOUtils.getFileLastModified(file);
 		Assertions.assertEquals(1658369334000L, lastModified);
+	}
+
+	@Test
+	public void testIsSpringBootDependenciesStarterJar() {
+		File file = new File(this.getClass().getClassLoader().getResource("easyj-test.jar").getFile());
+		boolean result = IOUtils.isSpringBootDependenciesStarterJar(file);
+		Assertions.assertTrue(result);
+
+		file = new File(this.getClass().getClassLoader().getResource("easyj.jar").getFile());
+		result = IOUtils.isSpringBootDependenciesStarterJar(file);
+		Assertions.assertFalse(result);
 	}
 }

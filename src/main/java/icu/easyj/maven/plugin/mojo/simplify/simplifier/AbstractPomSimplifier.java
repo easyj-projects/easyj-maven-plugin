@@ -29,6 +29,7 @@ import java.util.function.Function;
 import icu.easyj.maven.plugin.mojo.simplify.SimplifyPomMojoConfig;
 import icu.easyj.maven.plugin.mojo.utils.ObjectUtils;
 import icu.easyj.maven.plugin.mojo.utils.StringUtils;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
@@ -505,7 +506,7 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 	}
 
 	public void clearDependencyScopeCompileAndOptionalFalse(Dependency dependency) {
-		if (dependency.getScope() != null && "compile".equalsIgnoreCase(dependency.getScope())) {
+		if (dependency.getScope() != null && Artifact.SCOPE_COMPILE.equalsIgnoreCase(dependency.getScope())) {
 			this.log.info("  Set scope from '" + dependency.getScope() + "' to null: " + dependency.getManagementKey());
 			dependency.setScope(null);
 		}
@@ -553,13 +554,13 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 						&& dependency.getArtifactId().equals(originalDependency.getArtifactId())) {
 					//region 判断是否需要移除
 
-					if (!this.config.isKeepProvidedDependencies() && "provided".equalsIgnoreCase(dependency.getScope())) {
-						this.removeOneDependencies(dependency, n--, "scope=provided");
+					if (!this.config.isKeepProvidedDependencies() && Artifact.SCOPE_PROVIDED.equalsIgnoreCase(dependency.getScope())) {
+						this.removeOneDependencies(dependency, n--, "scope=" + Artifact.SCOPE_PROVIDED);
 						continue;
 					}
 
-					if (!this.config.isKeepTestDependencies() && "test".equalsIgnoreCase(dependency.getScope())) {
-						this.removeOneDependencies(dependency, n--, "scope=test");
+					if (!this.config.isKeepTestDependencies() && Artifact.SCOPE_TEST.equalsIgnoreCase(dependency.getScope())) {
+						this.removeOneDependencies(dependency, n--, "scope=" + Artifact.SCOPE_TEST);
 						continue;
 					}
 
@@ -579,7 +580,7 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 					originalDependency.setVersion(dependency.getVersion());
 					originalDependency.setClassifier(dependency.getClassifier());
 
-					originalDependency.setScope("compile".equalsIgnoreCase(dependency.getScope()) ? null : dependency.getScope());
+					originalDependency.setScope(Artifact.SCOPE_COMPILE.equalsIgnoreCase(dependency.getScope()) ? null : dependency.getScope());
 					originalDependency.setOptional(dependency.isOptional() ? "true" : null);
 
 					originalDependency.setSystemPath(dependency.getSystemPath());
@@ -619,7 +620,7 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 		originalDependency.setType(dependency.getType());
 		originalDependency.setClassifier(dependency.getClassifier());
 
-		originalDependency.setScope("compile".equalsIgnoreCase(dependency.getScope()) ? null : dependency.getScope());
+		originalDependency.setScope(Artifact.SCOPE_COMPILE.equalsIgnoreCase(dependency.getScope()) ? null : dependency.getScope());
 		originalDependency.setOptional(dependency.isOptional() ? "true" : null);
 
 		originalDependency.setSystemPath(dependency.getSystemPath());
@@ -673,11 +674,11 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 	}
 
 	protected boolean isNeedRemoved(Dependency dependency) {
-		if (!this.config.isKeepProvidedDependencies() && "provided".equalsIgnoreCase(dependency.getScope())) {
+		if (!this.config.isKeepProvidedDependencies() && Artifact.SCOPE_PROVIDED.equalsIgnoreCase(dependency.getScope())) {
 			return true;
 		}
 
-		if (!this.config.isKeepTestDependencies() && "test".equalsIgnoreCase(dependency.getScope())) {
+		if (!this.config.isKeepTestDependencies() && Artifact.SCOPE_TEST.equalsIgnoreCase(dependency.getScope())) {
 			return true;
 		}
 

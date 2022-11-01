@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import icu.easyj.maven.plugin.mojo.utils.IOUtils;
+import icu.easyj.maven.plugin.mojo.utils.ScopeFilter;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -68,25 +69,40 @@ public abstract class AbstractEasyjMojo extends AbstractMojo {
 		String scope = artifact.getScope();
 		return (scope == null
 				|| scope.trim().isEmpty()
-				|| "compile".equalsIgnoreCase(scope)
-				|| "runtime".equalsIgnoreCase(scope));
+				|| Artifact.SCOPE_COMPILE.equalsIgnoreCase(scope)
+				|| Artifact.SCOPE_RUNTIME.equalsIgnoreCase(scope));
 	}
 
 	protected boolean isScopeProvidedOrOptional(Artifact artifact) {
-		return artifact.isOptional() || "provided".equalsIgnoreCase(artifact.getScope());
+		return artifact.isOptional() || Artifact.SCOPE_PROVIDED.equalsIgnoreCase(artifact.getScope());
 	}
 
 	protected boolean isTestArtifact(Artifact artifact) {
-		return "test".equalsIgnoreCase(artifact.getScope());
+		return Artifact.SCOPE_TEST.equalsIgnoreCase(artifact.getScope());
 	}
 
 	protected boolean isNotTestArtifact(Artifact artifact) {
 		return !isTestArtifact(artifact);
 	}
 
-	protected boolean isUnnecessaryArtifact(Artifact artifact) {
-		return artifact.getId().toLowerCase().startsWith("org.springframework.boot:spring-boot-configuration-processor:")
-				|| artifact.getId().toLowerCase().startsWith("org.projectlombok:lombok:");
+	protected boolean isUnnecessaryArtifact(Artifact artifact, boolean libExcludeDependenciesStarter) {
+		// 几个编译期才起作用的依赖
+		if (artifact.getId().toLowerCase().startsWith("org.projectlombok:lombok:")
+				|| artifact.getId().toLowerCase().startsWith("org.springframework.boot:spring-boot-configuration-processor:")) {
+			return true;
+		}
+
+		// ”Spring-Boot-Jar-Type: dependencies-starter“ 的依赖
+		if (libExcludeDependenciesStarter && IOUtils.isSpringBootDependenciesStarterJar(artifact.getFile())) {
+			return true;
+		}
+
+		return false;
+	}
+
+	protected boolean filter(Artifact artifact, String includeScope, String excludeScope) {
+		ScopeFilter filter = new ScopeFilter(includeScope, excludeScope);
+		return filter.doFilter(artifact);
 	}
 
 	//endregion
