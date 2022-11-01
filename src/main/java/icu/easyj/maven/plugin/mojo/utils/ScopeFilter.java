@@ -40,7 +40,8 @@ public class ScopeFilter {
 		if (StringUtils.isNotEmpty(includeScope)) {
 			if (!Artifact.SCOPE_COMPILE.equals(includeScope) && !Artifact.SCOPE_TEST.equals(includeScope)
 					&& !Artifact.SCOPE_PROVIDED.equals(includeScope) && !Artifact.SCOPE_RUNTIME.equals(includeScope)
-					&& !Artifact.SCOPE_SYSTEM.equals(includeScope)) {
+					&& !Artifact.SCOPE_SYSTEM.equals(includeScope)
+					&& !Artifact.SCOPE_COMPILE_PLUS_RUNTIME.equals(includeScope) && !Artifact.SCOPE_RUNTIME_PLUS_SYSTEM.equals(includeScope)) {
 				throw new RuntimeException("Invalid Scope in includeScope: " + includeScope);
 			}
 
