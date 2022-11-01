@@ -490,7 +490,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		StringBuilder history = new StringBuilder();
 		// 文件来源说明与创建时间
 		history.append("```yaml").append(LINE_SEPARATOR)
-				.append("Created-By: icu.easyj.maven.plugins:easyj-maven-plugin:1.1.0-SNAPSHOT(goal:spring-boot-extend)").append(LINE_SEPARATOR)
+				.append("Created-By: icu.easyj.maven.plugins:easyj-maven-plugin:1.1.0(goal:spring-boot-extend)").append(LINE_SEPARATOR)
 				.append("Created-On: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(System.currentTimeMillis())).append(LINE_SEPARATOR)
 				.append("Tips: Please push this file to the VCS(Version Control System), it can be used to compare future changes to libs.").append(LINE_SEPARATOR)
 				.append("```").append(LINE_SEPARATOR)
