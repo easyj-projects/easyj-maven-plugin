@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 
@@ -65,6 +66,12 @@ public abstract class AbstractSimplifyPomMojo extends AbstractMojo {
 			if (!success) {
 				throw new MojoExecutionException("Failed to create directory " + pomFile.getParent());
 			}
+		}
+
+		// Handle encoding
+		if (model.getModelEncoding() == null) {
+			getLog().warn("No encoding specified for " + pomFile + ", using " + StandardCharsets.UTF_8);
+			model.setModelEncoding(StandardCharsets.UTF_8.name());
 		}
 
 		// Model to String
