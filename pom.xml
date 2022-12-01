@@ -18,7 +18,7 @@
 	<description>EasyJ开发的Maven插件，包含：简化POM功能、SpringBoot扩展、SpringBoot辅助发布等功能</description>
 
 	<properties>
-		<revision>1.1.1-SNAPSHOT</revision>
+		<revision>1.1.1</revision>
 
 		<maven.version>3.8.6</maven.version>
 		<mavenAnnotationsVersion>3.6.4</mavenAnnotationsVersion>
