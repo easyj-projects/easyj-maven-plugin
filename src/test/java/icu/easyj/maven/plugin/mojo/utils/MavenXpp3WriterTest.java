@@ -45,10 +45,10 @@ public class MavenXpp3WriterTest {
 		model.setProperties(properties);
 
 		Scm scm = new Scm();
-		//scm.setChildScmConnectionInheritAppendPath("aaaa");
+		//scm.setChildScmConnectionInheritAppendPath("aaa");
 		boolean hasMethod = true;
 		try {
-			Scm.class.getMethod("setChildScmConnectionInheritAppendPath", String.class).invoke(scm, "aaaa");
+			Scm.class.getMethod("setChildScmConnectionInheritAppendPath", String.class).invoke(scm, "aaa");
 		} catch (NoSuchMethodException e) {
 			hasMethod = false;
 		}
@@ -65,7 +65,7 @@ public class MavenXpp3WriterTest {
 		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 				"<!--测试fileComment-->\n" +
 				"<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
-				"\t<scm" + (hasMethod ? " child.scm.connection.inherit.append.path=\"aaaa\"" : "") + "/>\n" +
+				"\t<scm" + (hasMethod ? " child.scm.connection.inherit.append.path=\"aaa\"" : "") + "/>\n" +
 				"\t<properties>\n" +
 				"\t\t<aaa>111</aaa>\n" +
 				"\t\t<bbb/>\n" +
@@ -85,16 +85,23 @@ public class MavenXpp3WriterTest {
 		Assertions.assertEquals(expected, actual);
 	}
 
-	//@Test
-	//@Disabled("不用测试")
+	@Test
 	public void testReplace() {
 		String data = "  <properties>\r\n" +
 				"    <a>  \r\n" +
-				"  asdflkjlsadkfjlsdkafj\r\n" +
-				"    lsakdjflkasdjflksjadf\r\n" +
+				"  xxx\r\n" +
+				"    yyy\r\n" +
 				"    </a>\r\n" +
 				"        </properties>";
 		String data2 = data.replaceAll("(?=(^|  |\t))  (?=(\\s*\\<))", "\t");
-		System.out.println(data2);
+		Assertions.assertTrue(data2.length() < data.length());
+
+		String expected = "\t<properties>\r\n" +
+				"\t\t<a>  \r\n" +
+				"  xxx\r\n" +
+				"    yyy\r\n" +
+				"\t\t</a>\r\n" +
+				"\t\t\t\t</properties>";
+		Assertions.assertEquals(expected, data2);
 	}
 }

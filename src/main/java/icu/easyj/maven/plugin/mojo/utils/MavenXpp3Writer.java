@@ -17,11 +17,9 @@ package icu.easyj.maven.plugin.mojo.utils;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-import javax.annotation.Nullable;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Activation;
@@ -583,8 +581,9 @@ public class MavenXpp3Writer {
 		if (model.getBuild() != null) {
 			writeBuild(model.getBuild(), serializer);
 		}
-		if (ObjectUtils.invokeMethod(model, "getReports") != null) {
-			((Xpp3Dom)ObjectUtils.invokeMethod(model, "getReports")).writeToSerializer(NAMESPACE, serializer);
+		Object reports = ObjectUtils.invokeMethod(model, "getReports");
+		if (reports instanceof Xpp3Dom) {
+			((Xpp3Dom)reports).writeToSerializer(NAMESPACE, serializer);
 		}
 		if (model.getReporting() != null) {
 			writeReporting(model.getReporting(), serializer);
@@ -669,8 +668,9 @@ public class MavenXpp3Writer {
 		if ((plugin.getDependencies() != null) && (plugin.getDependencies().size() > 0)) {
 			this.writeList("dependencies", plugin.getDependencies(), this::writeDependency, serializer);
 		}
-		if (ObjectUtils.invokeMethod(plugin, "getGoals") != null) {
-			((Xpp3Dom)ObjectUtils.invokeMethod(plugin, "getGoals")).writeToSerializer(NAMESPACE, serializer);
+		Object goals = ObjectUtils.invokeMethod(plugin, "getGoals");
+		if (goals instanceof Xpp3Dom) {
+			((Xpp3Dom)goals).writeToSerializer(NAMESPACE, serializer);
 		}
 		if (!plugin.isInherited()) {
 			this.write("inherited", plugin.getInherited(), serializer);
@@ -749,8 +749,9 @@ public class MavenXpp3Writer {
 		if ((profile.getPluginRepositories() != null) && (profile.getPluginRepositories().size() > 0)) {
 			this.writeList("pluginRepositories", "pluginRepository", profile.getPluginRepositories(), this::writeRepository, serializer);
 		}
-		if (ObjectUtils.invokeMethod(profile, "getReports") != null) {
-			((Xpp3Dom)ObjectUtils.invokeMethod(profile, "getReports")).writeToSerializer(NAMESPACE, serializer);
+		Object reports = ObjectUtils.invokeMethod(profile, "getReports");
+		if (reports instanceof Xpp3Dom) {
+			((Xpp3Dom)reports).writeToSerializer(NAMESPACE, serializer);
 		}
 		if (profile.getReporting() != null) {
 			writeReporting(profile.getReporting(), serializer);
@@ -985,7 +986,7 @@ public class MavenXpp3Writer {
 
 	private void writeAttributeByMethod(Object obj, String methodName, String attributeName, MXSerializer serializer) throws IOException {
 		String attributeValue = ObjectUtils.invokeMethod(obj, methodName);
-		if (attributeValue != null) {
+		if (StringUtils.isNotEmpty(attributeValue)) {
 			serializer.attribute(NAMESPACE, attributeName, attributeValue);
 		}
 	}
