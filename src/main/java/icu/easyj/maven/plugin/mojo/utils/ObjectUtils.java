@@ -16,9 +16,11 @@
 package icu.easyj.maven.plugin.mojo.utils;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /**
  * 对象工具类
@@ -82,5 +84,39 @@ public abstract class ObjectUtils {
 		}
 
 		return false;
+	}
+
+	//region @since 1.0.3：兼容 低版本maven 或 高版本maven
+
+	@Nullable
+	public static <T> T invokeMethod(Object obj, String methodName) {
+		Method method;
+		try {
+			method = obj.getClass().getMethod(methodName);
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
+
+		try {
+			return (T)method.invoke(obj);
+		} catch (Exception e) {
+			throw new RuntimeException("Invoke method '" + method.getName() + "' failed", e);
+		}
+	}
+
+	@Nullable
+	public static <T> T invokeMethod(Object obj, String methodName, Class<?>[] classes, Object... args) {
+		Method method;
+		try {
+			method = obj.getClass().getMethod(methodName, classes);
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
+
+		try {
+			return (T)method.invoke(obj, args);
+		} catch (Exception e) {
+			throw new RuntimeException("Invoke method '" + method.getName() + "' failed", e);
+		}
 	}
 }

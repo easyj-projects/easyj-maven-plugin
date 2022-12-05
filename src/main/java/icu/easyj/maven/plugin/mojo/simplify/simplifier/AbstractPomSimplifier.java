@@ -812,8 +812,8 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 	}
 
 	public void removeReports() {
-		if (this.originalModel.getReports() != null) {
-			this.originalModel.setReports(null);
+		if (ObjectUtils.invokeMethod(this.originalModel, "getReports") != null) {
+			ObjectUtils.invokeMethod(this.originalModel, "setReports", new Class[]{Object.class}, new Object[]{null});
 		}
 	}
 

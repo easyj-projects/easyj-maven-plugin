@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Scm;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +53,7 @@ public class MavenXpp3WriterTest {
 			hasMethod = false;
 		}
 		model.setScm(scm);
-
+		ObjectUtils.invokeMethod(model, "setReports", new Class[]{Object.class}, new Xpp3Dom("reports"));
 
 		MavenXpp3Writer pomWriter = new MavenXpp3Writer(model, "测试fileComment", true);
 
@@ -69,6 +70,7 @@ public class MavenXpp3WriterTest {
 				"\t\t<aaa>111</aaa>\n" +
 				"\t\t<bbb/>\n" +
 				"\t</properties>\n" +
+				(ObjectUtils.invokeMethod(model, "getReports") != null ? "\t<reports/>\n" : "") +
 				"</project>\n";
 
 		// 实际值

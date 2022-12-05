@@ -583,8 +583,8 @@ public class MavenXpp3Writer {
 		if (model.getBuild() != null) {
 			writeBuild(model.getBuild(), serializer);
 		}
-		if (model.getReports() != null) {
-			((Xpp3Dom)model.getReports()).writeToSerializer(NAMESPACE, serializer);
+		if (ObjectUtils.invokeMethod(model, "getReports") != null) {
+			((Xpp3Dom)ObjectUtils.invokeMethod(model, "getReports")).writeToSerializer(NAMESPACE, serializer);
 		}
 		if (model.getReporting() != null) {
 			writeReporting(model.getReporting(), serializer);
@@ -669,8 +669,8 @@ public class MavenXpp3Writer {
 		if ((plugin.getDependencies() != null) && (plugin.getDependencies().size() > 0)) {
 			this.writeList("dependencies", plugin.getDependencies(), this::writeDependency, serializer);
 		}
-		if (plugin.getGoals() != null) {
-			((Xpp3Dom)plugin.getGoals()).writeToSerializer(NAMESPACE, serializer);
+		if (ObjectUtils.invokeMethod(plugin, "getGoals") != null) {
+			((Xpp3Dom)ObjectUtils.invokeMethod(plugin, "getGoals")).writeToSerializer(NAMESPACE, serializer);
 		}
 		if (!plugin.isInherited()) {
 			this.write("inherited", plugin.getInherited(), serializer);
@@ -749,8 +749,8 @@ public class MavenXpp3Writer {
 		if ((profile.getPluginRepositories() != null) && (profile.getPluginRepositories().size() > 0)) {
 			this.writeList("pluginRepositories", "pluginRepository", profile.getPluginRepositories(), this::writeRepository, serializer);
 		}
-		if (profile.getReports() != null) {
-			((Xpp3Dom)profile.getReports()).writeToSerializer(NAMESPACE, serializer);
+		if (ObjectUtils.invokeMethod(profile, "getReports") != null) {
+			((Xpp3Dom)ObjectUtils.invokeMethod(profile, "getReports")).writeToSerializer(NAMESPACE, serializer);
 		}
 		if (profile.getReporting() != null) {
 			writeReporting(profile.getReporting(), serializer);
@@ -983,27 +983,8 @@ public class MavenXpp3Writer {
 		serializer.endTag(NAMESPACE, tagName);
 	}
 
-
-	//region @since 1.0.3：兼容低版本maven
-
-	@Nullable
-	private <T> T invokeMethod(Object obj, String methodName) {
-		Method method;
-		try {
-			method = obj.getClass().getMethod(methodName);
-		} catch (NoSuchMethodException e) {
-			return null;
-		}
-
-		try {
-			return (T)method.invoke(obj);
-		} catch (Exception e) {
-			throw new RuntimeException("Invoke method '" + method.getName() + "' failed", e);
-		}
-	}
-
 	private void writeAttributeByMethod(Object obj, String methodName, String attributeName, MXSerializer serializer) throws IOException {
-		String attributeValue = this.invokeMethod(obj, methodName);
+		String attributeValue = ObjectUtils.invokeMethod(obj, methodName);
 		if (attributeValue != null) {
 			serializer.attribute(NAMESPACE, attributeName, attributeValue);
 		}
