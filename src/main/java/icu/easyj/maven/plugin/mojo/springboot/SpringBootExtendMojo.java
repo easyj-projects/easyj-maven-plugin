@@ -43,6 +43,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import static icu.easyj.maven.plugin.mojo.Version.VERSION;
 import static icu.easyj.maven.plugin.mojo.utils.IOUtils.LINE_SEPARATOR;
 import static icu.easyj.maven.plugin.mojo.utils.IOUtils.LINE_SEPARATOR2;
 
@@ -490,7 +491,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 		StringBuilder history = new StringBuilder();
 		// 文件来源说明与创建时间
 		history.append("```yaml").append(LINE_SEPARATOR)
-				.append("Created-By: icu.easyj.maven.plugins:easyj-maven-plugin:1.1.2(goal:spring-boot-extend)").append(LINE_SEPARATOR)
+				.append("Created-By: icu.easyj.maven.plugins:easyj-maven-plugin:").append(VERSION).append("(goal:spring-boot-extend)").append(LINE_SEPARATOR)
 				.append("Created-On: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(System.currentTimeMillis())).append(LINE_SEPARATOR)
 				.append("Tips: Please push this file to the VCS(Version Control System), it can be used to compare future changes to libs.").append(LINE_SEPARATOR)
 				.append("```").append(LINE_SEPARATOR)
