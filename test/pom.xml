@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>icu.easyj</groupId>
+		<artifactId>easyj-tools-parent</artifactId>
+		<version>${revision}</version>
+	</parent>
+
+	<artifactId>test</artifactId>
+
+	<name>${project.groupId} :: ${project.artifactId}</name>
+	<description>测试</description>
+
+	<properties>
+		<easyj-maven-plugin.version>${project.version}</easyj-maven-plugin.version>
+	</properties>
+</project>

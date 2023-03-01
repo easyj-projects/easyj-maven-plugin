@@ -18,6 +18,7 @@
 
 	<modules>
 		<module>easyj-maven-plugin</module>
+		<module>test</module>
 	</modules>
 
 	<properties>
