@@ -22,7 +22,7 @@
 	</modules>
 
 	<properties>
-		<revision>1.1.3</revision>
+		<revision>1.1.4</revision>
 
 		<plexus-utils.version>3.4.2</plexus-utils.version>
 
