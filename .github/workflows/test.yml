@@ -15,9 +15,9 @@ jobs:
       matrix:
         java: [ 8, 11, 17 ]
         maven: [
-          4.0.0-alpha-4 -DmavenAnnotationsVersion=3.7.0,
-          4.0.0-alpha-3 -DmavenAnnotationsVersion=3.7.0,
-          4.0.0-alpha-2 -DmavenAnnotationsVersion=3.7.0,
+          4.0.0-alpha-4 -Dmaven-plugin-annotations.version=3.7.0,
+          4.0.0-alpha-3 -Dmaven-plugin-annotations.version=3.7.0,
+          4.0.0-alpha-2 -Dmaven-plugin-annotations.version=3.7.0,
           3.9.0,
           3.8.7,
           3.8.6,
@@ -50,8 +50,12 @@ jobs:
           java-version: ${{ matrix.java }}
 
       # step 3
+      - name: "Print maven version"
+        run: |
+          mvn -version
+
+      # step 4
       - name: "Run Test With Maven"
-        # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: |
           if [ "${{ matrix.java }}" == "8" ]; then
             mvn clean test -Pcicd8 -Dmaven.version=${{ matrix.maven }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
@@ -59,7 +63,7 @@ jobs:
             mvn clean test -Pcicd  -Dmaven.version=${{ matrix.maven }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
 
-      # step 4
+      # step 5
       - name: "Codecov"
         if: matrix.java == '8' && matrix.maven == '3.8.6' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
         uses: codecov/codecov-action@v2.1.0
