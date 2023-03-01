@@ -43,6 +43,8 @@ public class PomSimplifier extends AbstractPomSimplifier {
 		this.removeModules();
 
 		this.removeLocalProperties();
+
+		this.keepProfiles();
 	}
 
 
