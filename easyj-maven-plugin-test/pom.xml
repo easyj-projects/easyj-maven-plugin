@@ -8,10 +8,11 @@
 		<version>${revision}</version>
 	</parent>
 
-	<artifactId>test</artifactId>
+	<artifactId>easyj-maven-plugin-test</artifactId>
+	<packaging>pom</packaging>
 
 	<name>${project.groupId} :: ${project.artifactId}</name>
-	<description>测试</description>
+	<description>测试 easyj-maven-plugin</description>
 
 	<properties>
 		<easyj-maven-plugin.version>${project.version}</easyj-maven-plugin.version>
