@@ -59,6 +59,7 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.model.Scm;
 import org.apache.maven.model.Site;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.codehaus.plexus.util.xml.pull.MXSerializer;
 
 /**
  * 为了更加简化POM文件，复制了 {@link org.apache.maven.model.io.xpp3.MavenXpp3Writer} 并修改部分代码.
