@@ -26,6 +26,11 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE
 
       # step 3
+      - name: "Print maven version"
+        run: |
+          mvn -version
+
+      # step 4
       - name: "Publish-To-OSSRH"
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
