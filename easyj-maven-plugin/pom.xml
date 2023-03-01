@@ -39,7 +39,7 @@
 			<groupId>org.codehaus.plexus</groupId>
 			<artifactId>plexus-utils</artifactId>
 			<version>${plexus-utils.version}</version>
-			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
@@ -63,6 +63,80 @@
 						<goals>
 							<goal>descriptor</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/*.java.template</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>icu.easyj.maven.plugins</groupId>
+				<artifactId>easyj-maven-plugin</artifactId>
+				<configuration>
+					<mainPaths>
+						<path>icu/easyj/maven/plugin/mojo/Version.java.template</path>
+					</mainPaths>
+				</configuration>
+				<executions>
+					<execution>
+						<id>generate-java-by-template</id>
+						<goals>
+							<goal>replace-java</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!--
+				将 `org.codehaus.plexus:plexus-utils` 中的部分类合并进来，供 `icu.easyj.maven.plugin.mojo.utils.MavenXpp3Writer` 使用。
+				用于兼容 `maven:3.9.0`。
+			 -->
+			<plugin>
+				<artifactId>maven-shade-plugin</artifactId>
+				<configuration>
+					<createDependencyReducedPom>false</createDependencyReducedPom>
+				</configuration>
+				<executions>
+					<execution>
+						<id>shade_plexus-utils</id>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
+							<promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<minimizeJar>true</minimizeJar>
+							<createSourcesJar>true</createSourcesJar>
+							<shadeSourcesContent>true</shadeSourcesContent>
+							<artifactSet>
+								<includes>
+									<include>org.codehaus.plexus:plexus-utils</include>
+								</includes>
+							</artifactSet>
+							<filters>
+								<filter>
+									<artifact>org.codehaus.plexus:plexus-utils</artifact>
+									<excludes>
+										<exclude>licenses/*</exclude>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+							</filters>
+							<relocations>
+								<relocation>
+									<pattern>org.codehaus.plexus.util</pattern>
+									<shadedPattern>icu.easyj.maven.plugin.mojo.shaded.org.codehaus.plexus.util</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
