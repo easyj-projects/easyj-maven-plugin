@@ -747,17 +747,19 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 		Set<String> removeConfigSet = new HashSet<>(Arrays.asList(removeConfigNames));
 		removeConfigSet.remove(null);
 
-		Xpp3Dom configDom = (Xpp3Dom)plugin.getConfiguration();
-		for (int i = 0; i < configDom.getChildren().length; i++) {
-			Xpp3Dom child = configDom.getChildren()[i];
-			if (removeConfigSet.contains(child.getName())) {
-				this.log.info("Remove one config '" + child.getName() + "' from the plugin '" + plugin.getId() + "'.");
-				configDom.removeChild(i--);
+		if (plugin.getConfiguration() instanceof Xpp3Dom) {
+			Xpp3Dom configDom = (Xpp3Dom) plugin.getConfiguration();
+			for (int i = 0; i < configDom.getChildren().length; i++) {
+				Xpp3Dom child = configDom.getChildren()[i];
+				if (removeConfigSet.contains(child.getName())) {
+					this.log.info("Remove one config '" + child.getName() + "' from the plugin '" + plugin.getId() + "'.");
+					configDom.removeChild(i--);
+				}
 			}
-		}
-		if (configDom.getChildren().length == 0) {
-			this.log.info("Remove Configuration from the plugin '" + plugin.getId() + "'.");
-			plugin.setConfiguration(null);
+			if (configDom.getChildren().length == 0) {
+				this.log.info("Remove Configuration from the plugin '" + plugin.getId() + "'.");
+				plugin.setConfiguration(null);
+			}
 		}
 	}
 

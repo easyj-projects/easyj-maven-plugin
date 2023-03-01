@@ -675,7 +675,7 @@ public class MavenXpp3Writer {
 		if (!plugin.isInherited()) {
 			this.write("inherited", plugin.getInherited(), serializer);
 		}
-		if (plugin.getConfiguration() != null) {
+		if (plugin.getConfiguration() instanceof Xpp3Dom) {
 			((Xpp3Dom)plugin.getConfiguration()).writeToSerializer(NAMESPACE, serializer);
 		}
 		serializer.endTag(NAMESPACE, "plugin");
@@ -695,7 +695,7 @@ public class MavenXpp3Writer {
 		if (!pluginExecution.isInherited()) {
 			this.write("inherited", pluginExecution.getInherited(), serializer);
 		}
-		if (pluginExecution.getConfiguration() != null) {
+		if (pluginExecution.getConfiguration() instanceof Xpp3Dom) {
 			((Xpp3Dom)pluginExecution.getConfiguration()).writeToSerializer(NAMESPACE, serializer);
 		}
 		serializer.endTag(NAMESPACE, "execution");
@@ -793,7 +793,7 @@ public class MavenXpp3Writer {
 		if (!reportPlugin.isInherited()) {
 			this.write("inherited", reportPlugin.getInherited(), serializer);
 		}
-		if (reportPlugin.getConfiguration() != null) {
+		if (reportPlugin.getConfiguration() instanceof Xpp3Dom) {
 			((Xpp3Dom)reportPlugin.getConfiguration()).writeToSerializer(NAMESPACE, serializer);
 		}
 		serializer.endTag(NAMESPACE, "plugin");
@@ -810,7 +810,7 @@ public class MavenXpp3Writer {
 		if (!reportSet.isInherited()) {
 			this.write("inherited", reportSet.getInherited(), serializer);
 		}
-		if (reportSet.getConfiguration() != null) {
+		if (reportSet.getConfiguration() instanceof Xpp3Dom) {
 			((Xpp3Dom)reportSet.getConfiguration()).writeToSerializer(NAMESPACE, serializer);
 		}
 		serializer.endTag(NAMESPACE, "reportSet");
