@@ -24,8 +24,6 @@
 	<properties>
 		<revision>1.1.6-SNAPSHOT</revision>
 
-		<plexus-utils.version>3.4.2</plexus-utils.version>
-
 		<junit.version>5.8.2</junit.version>
 		<jsr305.version>3.0.2</jsr305.version>
 	</properties>
@@ -72,13 +70,6 @@
 			<plugin>
 				<groupId>icu.easyj.maven.plugins</groupId>
 				<artifactId>easyj-maven-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>org.codehaus.plexus</groupId>
-						<artifactId>plexus-utils</artifactId>
-						<version>${plexus-utils.version}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
