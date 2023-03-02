@@ -2,13 +2,11 @@ name: "Test"
 
 on:
   push:
-    branches: [ develop, test* ]
-  pull_request:
-    branches: [ develop ]
+    branches: [ master, test* ]
 
 jobs:
-  test:
-    name: "Test"
+  test-release:
+    name: "Test Release"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,6 +34,22 @@ jobs:
           #2.2.1,
           #2.1.0,
           #2.0.11
+        ]
+        plexus-utils: [
+          3.5.0,
+          3.4.2,
+          3.3.1,
+          3.2.1,
+          3.1.1,
+          3.0.24,
+          2.1,
+          2.0.7,
+          1.5.15,
+          1.4.9,
+          1.3,
+          1.2,
+          1.1,
+          1.0.5
         ]
     steps:
       # step 1
