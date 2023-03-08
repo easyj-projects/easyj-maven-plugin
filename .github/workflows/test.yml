@@ -2,7 +2,7 @@ name: "Test"
 
 on:
   push:
-    branches: [ develop, test* ]
+    branches: [ develop ]
   pull_request:
     branches: [ develop ]
 
@@ -65,5 +65,5 @@ jobs:
 
       # step 5
       - name: "Codecov"
-        if: matrix.java == '8' && matrix.maven == '3.8.6' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
+        if: matrix.java == '8' && matrix.maven == '3.9.0' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
         uses: codecov/codecov-action@v2.1.0
