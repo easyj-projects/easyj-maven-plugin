@@ -685,7 +685,7 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 
 		// 创建startup.bat文件
 		createStartupFile("bat",
-				"chcp 65001\r\n\r\ntitle \"" + project.getBuild().getFinalName() + "\"" + LINE_SEPARATOR2 + LINE_SEPARATOR2
+				"title \"" + project.getBuild().getFinalName() + "\"" + LINE_SEPARATOR2 + LINE_SEPARATOR2
 						+ startupScript
 						+ "\r\n\r\ncmd\r\n"
 		);
