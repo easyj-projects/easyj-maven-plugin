@@ -58,6 +58,9 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 	@Parameter(property = "maven.file-generate.module-name-pattern")
 	private String moduleNamePattern;
 
+	@Parameter(property = "maven.file-generate.exclude-modules")
+	private String excludeModules;
+
 	@Parameter
 	List<FileInfo> generateFiles;
 
@@ -103,6 +106,12 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 
 			if (!isMatched) {
 				getLog().info("File-Generate has been skipped, because module name '" + project.getArtifactId() + "' not matched '" + moduleNamePattern + "'.");
+				return;
+			}
+
+			// 判断排除项
+			if (StringUtils.isNotEmpty(excludeModules) && (',' + excludeModules.replaceAll("\\s+", "") + ',').contains(',' + project.getArtifactId() + ',')) {
+				getLog().info("File-Generate has been skipped, because exclude, the exclude-modules is '" + excludeModules + "'.");
 				return;
 			}
 		}
