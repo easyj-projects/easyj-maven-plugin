@@ -15,12 +15,10 @@
  */
 package icu.easyj.maven.plugin.mojo.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.jar.Attributes;
@@ -114,6 +112,15 @@ public abstract class IOUtils {
 	 * @throws IOException IO异常
 	 */
 	public static void createFile(File newFile, String text) throws IOException {
+		// 使用Paths和Files类来操作文件和目录
+		Path path = Paths.get(newFile.getPath());
+
+		// 如果目录不存在，则创建目录
+		Path directory = path.getParent();
+		if (directory != null && !Files.exists(directory)) {
+			Files.createDirectories(directory);
+		}
+
 		try (FileOutputStream out = new FileOutputStream(newFile)) {
 			out.write(text.getBytes());
 			out.flush();
