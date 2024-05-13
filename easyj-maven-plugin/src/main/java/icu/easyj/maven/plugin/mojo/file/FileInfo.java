@@ -26,9 +26,19 @@ public class FileInfo {
 	private String path;
 
 	/**
+	 * 操作类型
+	 */
+	private String action;
+
+	/**
 	 * 文件内容
 	 */
 	private String content;
+
+	/**
+	 * 当前配置是否生效
+	 */
+	private Boolean enabled;
 
 
 	public String getPath() {
@@ -39,6 +49,14 @@ public class FileInfo {
 		this.path = path;
 	}
 
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}
+
 	public String getContent() {
 		return content;
 	}
@@ -47,11 +65,22 @@ public class FileInfo {
 		this.content = content;
 	}
 
+	public Boolean getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
+
 	@Override
 	public String toString() {
 		return "FileInfo{" +
 				"path='" + path + '\'' +
-				", content=[" + content + ']' +
+				", action='" + action + '\'' +
+				", content='" + content + '\'' +
+				", enabled=" + enabled +
 				'}';
 	}
 }

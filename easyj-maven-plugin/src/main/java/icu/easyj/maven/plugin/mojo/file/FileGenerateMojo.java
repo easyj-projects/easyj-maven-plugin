@@ -133,16 +133,30 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 			getLog().info("fileList: " + generateFiles.toString());
 
 			for (FileInfo fileInfo : generateFiles) {
-				if (StringUtils.isEmpty(fileInfo.getPath())) {
+				if (StringUtils.isEmpty(fileInfo.getPath()) || Boolean.FALSE.equals(fileInfo.getEnabled())) {
 					continue;
 				}
 
+				// 创建文件
 				File file = new File(this.outputDirectory, fileInfo.getPath());
-				try {
-					IOUtils.createFile(file, fileInfo.getContent());
-					getLog().info("Generate file: " + fileInfo.getPath());
-				} catch (IOException e) {
-					getLog().warn("Generate file failed: " + fileInfo.getPath(), e);
+
+				if ("delete".equalsIgnoreCase(fileInfo.getAction())) {
+					// 删除文件
+					if (file.exists()) {
+						try {
+							file.delete();
+						} catch (Exception e) {
+							getLog().warn("Delete file failed: " + fileInfo.getPath(), e);
+						}
+					}
+				} else {
+					// 新增文件
+					try {
+						IOUtils.createFile(file, fileInfo.getContent());
+						getLog().info("Generate file: " + fileInfo.getPath());
+					} catch (IOException e) {
+						getLog().warn("Generate file failed: " + fileInfo.getPath(), e);
+					}
 				}
 			}
 		}
