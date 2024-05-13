@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import icu.easyj.maven.plugin.mojo.AbstractEasyjMojo;
@@ -53,6 +54,12 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 	private boolean checkHasModulesTag;
 
 	/**
+	 * 是否需要判断pom.xml的packaging值为pom，而不是jar或其他
+	 */
+	@Parameter(property = "maven.file-generate.check-is-pom", defaultValue = "false")
+	private boolean checkIsPom;
+
+	/**
 	 * 匹配
 	 */
 	@Parameter(property = "maven.file-generate.module-name-pattern")
@@ -73,6 +80,11 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 
 		if (checkHasModulesTag && (project.getModules() == null || project.getModules().isEmpty())) {
 			getLog().info("File-Generate has been skipped, because `<modules>...</modules>` not exist.");
+			return;
+		}
+
+		if (checkIsPom && !Objects.equals(project.getPackaging(), "pom")) {
+			getLog().info("File-Generate has been skipped, because `<packaging>" + project.getPackaging() + "</packaging>` is not 'pom'.");
 			return;
 		}
 
