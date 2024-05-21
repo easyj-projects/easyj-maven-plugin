@@ -74,6 +74,10 @@ public class FileInfo {
 	}
 
 
+	public boolean isEnabled() {
+		return enabled == null || enabled; // 为 null 或 ture 时，表示生效
+	}
+
 	@Override
 	public String toString() {
 		return "FileInfo{" +
