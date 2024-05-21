@@ -38,7 +38,7 @@ import org.apache.maven.project.MavenProject;
  * @author wangliang181230
  * @since 1.1.6
  */
-@Mojo(name = "file-generate", defaultPhase = LifecyclePhase.INITIALIZE, threadSafe = true)
+@Mojo(name = "file-generate", defaultPhase = LifecyclePhase.VALIDATE, threadSafe = true)
 public class FileGenerateMojo extends AbstractEasyjMojo {
 
 	@Parameter(defaultValue = "${project}", readonly = true, required = true)
