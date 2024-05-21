@@ -488,10 +488,9 @@ public class MavenXpp3Writer {
 
 	private void writeModel(MXSerializer serializer) throws IOException {
 		if (this.fileComment != null) {
-			serializer.text(IOUtils.LINE_SEPARATOR);
 			serializer.comment(this.fileComment);
+			serializer.text(IOUtils.LINE_SEPARATOR);
 		}
-		serializer.text(IOUtils.LINE_SEPARATOR);
 
 		//serializer.setPrefix("", "http://maven.apache.org/POM/4.0.0");
 		//serializer.setPrefix("xsi", "http://www.w3.org/2001/XMLSchema-instance");
