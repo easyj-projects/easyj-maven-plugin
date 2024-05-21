@@ -857,17 +857,6 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 		}
 	}
 
-	public void keepProfiles() {
-		if (isEmpty(originalModel.getProfiles())) {
-			return;
-		}
-
-		if ((originalModel.getParent() != null && model.getParent() != null)
-				|| (originalModel.getParent() == null && model.getParent() == null)) {
-			originalModel.setProfiles(model.getProfiles());
-		}
-	}
-
 	//endregion ##
 
 

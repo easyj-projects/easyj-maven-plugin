@@ -133,7 +133,7 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 			getLog().info("fileList: " + generateFiles.toString());
 
 			for (FileInfo fileInfo : generateFiles) {
-				if (StringUtils.isEmpty(fileInfo.getPath()) || fileInfo.isEnabled()) {
+				if (StringUtils.isEmpty(fileInfo.getPath()) || !fileInfo.isEnabled()) {
 					continue;
 				}
 

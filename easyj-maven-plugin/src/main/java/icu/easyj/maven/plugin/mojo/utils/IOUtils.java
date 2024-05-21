@@ -122,7 +122,7 @@ public abstract class IOUtils {
 		}
 
 		try (FileOutputStream out = new FileOutputStream(newFile)) {
-			out.write(text.getBytes());
+			out.write(text.replaceAll("\r", "").getBytes());
 			out.flush();
 		}
 	}
