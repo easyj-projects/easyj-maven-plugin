@@ -152,6 +152,11 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 				} else {
 					// 新增文件
 					try {
+						fileInfo.setContent(fileInfo.getContent().replaceAll("\r?\n", "\r\n"));
+						if (!fileInfo.getContent().endsWith("\n")) {
+							fileInfo.setContent(fileInfo.getContent() + "\r\n");
+						}
+
 						IOUtils.createFile(file, fileInfo.getContent());
 						getLog().info("Generate file: " + fileInfo.getPath());
 					} catch (IOException e) {
