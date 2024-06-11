@@ -140,7 +140,10 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 				// 创建文件
 				File file = new File(this.outputDirectory, fileInfo.getPath());
 
-				if ("delete".equalsIgnoreCase(fileInfo.getAction())) {
+				if ("skip".equalsIgnoreCase(fileInfo.getAction())) {
+					// 跳过
+					getLog().info("Skip file: " + fileInfo.getPath());
+				} else if ("delete".equalsIgnoreCase(fileInfo.getAction())) {
 					// 删除文件
 					if (file.exists()) {
 						try {
