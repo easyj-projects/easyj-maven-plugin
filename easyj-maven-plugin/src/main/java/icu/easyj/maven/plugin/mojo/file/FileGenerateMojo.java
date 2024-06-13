@@ -145,6 +145,7 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 					if (file.exists()) {
 						try {
 							file.delete();
+							getLog().info("Delete file: " + fileInfo.getPath());
 						} catch (Exception e) {
 							getLog().warn("Delete file failed: " + fileInfo.getPath(), e);
 						}
