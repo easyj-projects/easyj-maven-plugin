@@ -659,6 +659,8 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 
 			if (!dependencyBefore.equals(dependencyAfter)) {
 				this.log.info("  optimize dependency: " + dependencyBefore + " -> " + dependencyAfter);
+			} else {
+				this.log.info("    keep   dependency: " + dependencyBefore);
 			}
 		}
 	}

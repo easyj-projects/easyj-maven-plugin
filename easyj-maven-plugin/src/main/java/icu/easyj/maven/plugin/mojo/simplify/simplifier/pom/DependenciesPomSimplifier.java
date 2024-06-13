@@ -57,4 +57,13 @@ public class DependenciesPomSimplifier extends PomSimplifier {
 
 		super.doSimplify();
 	}
+
+
+	@Override
+	public void afterSimplify() {
+		this.replaceParentRevision();
+		this.removeGroupIdAndVersionIfEqualsToParent();
+		this.optimizeDependencyManagement();
+		this.optimizeDependencies();
+	}
 }
