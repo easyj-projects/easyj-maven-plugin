@@ -666,7 +666,8 @@ public abstract class AbstractPomSimplifier implements IPomSimplifier {
 	}
 
 	protected Function<String, String> getReplaceVariableFunction() {
-		if (this.originalModel.getParent() != null || isEmpty(this.model.getProperties())) {
+		boolean removedParent = this.originalModel.getParent() == null && this.model.getParent() != null;
+		if (!removedParent && (this.originalModel.getParent() != null || isEmpty(this.model.getProperties()))) {
 			this.log.info(" - Optimize with 'getProjectProperty'");
 			return this::getProjectProperty;
 		} else {

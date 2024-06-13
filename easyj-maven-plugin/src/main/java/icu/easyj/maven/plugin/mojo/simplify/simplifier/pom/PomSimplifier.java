@@ -47,15 +47,6 @@ public class PomSimplifier extends AbstractPomSimplifier {
 
 
 	@Override
-	public void afterSimplify() {
-		this.replaceParentRevision();
-		this.removeGroupIdAndVersionIfEqualsToParent();
-		//this.optimizeDependencyManagement();
-		this.optimizeDependencies();
-	}
-
-
-	@Override
 	public void removeDependencyManagement() {
 		// do nothing
 	}
