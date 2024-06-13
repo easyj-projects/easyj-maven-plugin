@@ -144,8 +144,11 @@ public class FileGenerateMojo extends AbstractEasyjMojo {
 					// 删除文件
 					if (file.exists()) {
 						try {
-							file.delete();
-							getLog().info("Delete file: " + fileInfo.getPath());
+							if (file.delete()) {
+								getLog().info("Delete file: " + fileInfo.getPath());
+							} else {
+								getLog().info("No files were deleted: " + fileInfo.getPath());
+							}
 						} catch (Exception e) {
 							getLog().warn("Delete file failed: " + fileInfo.getPath(), e);
 						}
