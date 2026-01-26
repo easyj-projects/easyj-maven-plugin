@@ -16,6 +16,7 @@
 package icu.easyj.maven.plugin.mojo.utils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -122,7 +123,7 @@ public abstract class IOUtils {
 		}
 
 		try (FileOutputStream out = new FileOutputStream(newFile)) {
-			out.write(text.getBytes());
+			out.write(text.getBytes(StandardCharsets.UTF_8));
 			out.flush();
 		}
 	}
