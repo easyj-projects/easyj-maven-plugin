@@ -614,11 +614,26 @@ public class SpringBootExtendMojo extends AbstractSpringBootMojo {
 	 * @return 主要历史信息
 	 */
 	String getLibHistoryTableTxt(String libHistoryTxt) {
+		if (ObjectUtils.isEmpty(libHistoryTxt)) {
+			return "";
+		}
+
 		libHistoryTxt = libHistoryTxt
 				.replaceAll("[ \t\r]+", "") // 去除所有空格
 				.replaceAll("[:\\-]+(?=\\|)", "") // 去除表头的
 				.replaceAll("\\|{5,}", "||||"); // 把表头和表内容的分隔行的符号替换成4个，方便substring，避免上面内容改了造成BUG。
-		return libHistoryTxt.substring(libHistoryTxt.indexOf("||||") + 5).trim(); // 获取表格内容
+
+		// 兼容空文件、旧格式或被截断的历史文件：找不到表头分隔行时，直接返回整段内容（视为已变更），避免 substring 越界
+		int index = libHistoryTxt.indexOf("||||");
+		if (index < 0) {
+			return libHistoryTxt.trim();
+		}
+		// "+ 5" 表示跳过 "||||"（4个竖线）与其后的一个换行符
+		int beginIndex = index + 5;
+		if (beginIndex >= libHistoryTxt.length()) {
+			return "";
+		}
+		return libHistoryTxt.substring(beginIndex).trim(); // 获取表格内容
 	}
 
 	@Nullable

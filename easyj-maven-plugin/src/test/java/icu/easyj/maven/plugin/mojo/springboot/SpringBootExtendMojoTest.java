@@ -39,6 +39,23 @@ public class SpringBootExtendMojoTest {
 	}
 
 	@Test
+	public void testGetLibHistoryTableTxtWithEmptyContent() {
+		// 空字符串不应抱 StringIndexOutOfBoundsException（曾导致 "String index out of range: -4"）
+		Assertions.assertEquals("", mojo.getLibHistoryTableTxt(""));
+		Assertions.assertEquals("", mojo.getLibHistoryTableTxt(null));
+		// 只有空白/分隔符，处理后长度不足，也不能抛异常
+		Assertions.assertEquals("", mojo.getLibHistoryTableTxt("   ").trim());
+		Assertions.assertEquals("", mojo.getLibHistoryTableTxt("||||"));
+	}
+
+	@Test
+	public void testGetLibHistoryTableTxtWithoutTable() {
+		// 旧格式/被截断、没有表头分隔行的文件，应返回整段内容而非抛异常
+		String txt = "```yaml\nCreated-By: xxx\n```";
+		Assertions.assertEquals(txt.replaceAll("[ \\t\\r]+", "").trim(), mojo.getLibHistoryTableTxt(txt));
+	}
+
+	@Test
 	public void testReadLibHistoryFileCreatedOn() {
 		String libHistoryTxt = IOUtils.getInputStreamTxt(this.getClass().getResourceAsStream("/origin_lib.history.md"));
 		String timeStr = mojo.readLibHistoryFileCreatedOn(libHistoryTxt);
